@@ -49,6 +49,8 @@ const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'everlast-settings',
+      // Skip hydration during SSR
+      skipHydration: true,
       // In production, API keys should be stored in OS keychain via Tauri
       partialize: (state) => ({
         settings: {
@@ -74,6 +76,11 @@ const useSettingsStore = create<SettingsStore>()(
 export function useSettings() {
   const { settings, setSettings, resetSettings } = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
+
+  // Hydrate on client side
+  useEffect(() => {
+    useSettingsStore.persist.rehydrate();
+  }, []);
 
   const updateSettings = useCallback(
     (newSettings: Partial<Settings>) => {

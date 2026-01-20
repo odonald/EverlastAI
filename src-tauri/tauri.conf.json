@@ -46,9 +46,7 @@
     "macOS": {
       "minimumSystemVersion": "10.13",
       "entitlements": "./entitlements.plist",
-      "infoPlist": {
-        "NSMicrophoneUsageDescription": "EverlastAI needs microphone access to record your voice for transcription."
-      }
+      "infoPlist": "./Info.plist"
     },
     "windows": {
       "webviewInstallMode": {
