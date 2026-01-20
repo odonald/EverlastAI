@@ -6,28 +6,43 @@ import { OutputDisplay } from '@/components/output/output-display';
 import { SettingsDialog } from '@/components/settings/settings-dialog';
 import { HotkeyIndicator } from '@/components/ui/hotkey-indicator';
 import { useAuth } from '@/hooks/use-auth';
+import { useSettings } from '@/hooks/use-settings';
 import { LoginButton } from '@/components/auth/login-button';
 import { Settings, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { enrich } from '@/lib/llm';
 
 export default function Home() {
   const [output, setOutput] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { settings } = useSettings();
 
   const handleTranscriptionComplete = async (transcription: string) => {
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: transcription }),
+      const apiKey = settings.llmProvider === 'openai'
+        ? settings.apiKeys.openai
+        : settings.apiKeys.anthropic;
+
+      if (!apiKey) {
+        console.warn('No LLM API key configured, showing raw transcription');
+        setOutput(transcription);
+        return;
+      }
+
+      console.log('Enriching with provider:', settings.llmProvider, 'mode:', settings.enrichmentMode);
+      const enrichedText = await enrich(transcription, {
+        provider: settings.llmProvider,
+        mode: settings.enrichmentMode,
+        apiKey,
       });
-      const data = await response.json();
-      setOutput(data.enrichedText);
+      setOutput(enrichedText);
     } catch (error) {
       console.error('Enrichment failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Enrichment failed: ${errorMessage}`);
       setOutput(transcription);
     } finally {
       setIsProcessing(false);

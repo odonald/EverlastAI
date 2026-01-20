@@ -7,19 +7,20 @@ export type EnrichmentMode = 'auto' | 'notes' | 'summary' | 'action-items' | 'fo
 export interface EnrichmentOptions {
   provider: LLMProvider;
   mode: EnrichmentMode;
+  apiKey?: string;
 }
 
 export async function enrich(
   text: string,
   options: EnrichmentOptions
 ): Promise<string> {
-  const { provider, mode } = options;
+  const { provider, mode, apiKey } = options;
 
   switch (provider) {
     case 'openai':
-      return enrichWithOpenAI(text, mode);
+      return enrichWithOpenAI(text, mode, apiKey);
     case 'anthropic':
-      return enrichWithClaude(text, mode);
+      return enrichWithClaude(text, mode, apiKey);
     default:
       throw new Error(`Unknown LLM provider: ${provider}`);
   }

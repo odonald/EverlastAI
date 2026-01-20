@@ -4,12 +4,13 @@ import { type EnrichmentMode, getSystemPrompt } from './index';
 
 export async function enrichWithOpenAI(
   text: string,
-  mode: EnrichmentMode
+  mode: EnrichmentMode,
+  providedKey?: string
 ): Promise<string> {
-  const apiKey = await getApiKey('openai');
+  const apiKey = providedKey || await getApiKey('openai');
 
   if (!apiKey) {
-    throw new Error('OpenAI API key not configured');
+    throw new Error('OpenAI API key not configured. Please add your API key in Settings.');
   }
 
   const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });

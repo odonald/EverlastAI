@@ -182,19 +182,6 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
             : 'Click to start recording'}
       </p>
 
-      {/* Audio level indicator during recording */}
-      {isRecording && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Level:</span>
-          <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-green-500 transition-all duration-75"
-              style={{ width: `${Math.min(100, audioLevel * 100)}%` }}
-            />
-          </div>
-          <span>{Math.round(audioLevel * 100)}%</span>
-        </div>
-      )}
     </div>
   );
 }
