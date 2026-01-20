@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' https://api.deepgram.com https://api.elevenlabs.io https://api.openai.com https://api.anthropic.com wss://api.deepgram.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:"
+      "csp": "default-src 'self'; connect-src 'self' https://*.auth0.com https://api.deepgram.com https://api.elevenlabs.io https://api.openai.com https://api.anthropic.com wss://api.deepgram.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.auth0.com https://*.gravatar.com; media-src 'self' blob:; font-src 'self' data:; frame-src 'self' https://*.auth0.com"
     }
   },
   "plugins": {},

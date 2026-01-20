@@ -23,18 +23,30 @@ const AUTH0_CLIENT_ID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || '';
 
 // Create Auth0 client singleton
 let auth0Client: Auth0Client | null = null;
+let auth0InitError: Error | null = null;
 
-async function getAuth0Client(): Promise<Auth0Client> {
+async function getAuth0Client(): Promise<Auth0Client | null> {
+  if (auth0InitError) return null;
   if (auth0Client) return auth0Client;
 
-  auth0Client = new Auth0Client({
-    domain: AUTH0_DOMAIN,
-    clientId: AUTH0_CLIENT_ID,
-    cacheLocation: 'localstorage',
-    useRefreshTokens: true,
-  });
+  if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
+    console.warn('Auth0 not configured');
+    return null;
+  }
 
-  return auth0Client;
+  try {
+    auth0Client = new Auth0Client({
+      domain: AUTH0_DOMAIN,
+      clientId: AUTH0_CLIENT_ID,
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true,
+    });
+    return auth0Client;
+  } catch (error) {
+    auth0InitError = error as Error;
+    console.error('Failed to initialize Auth0:', error);
+    return null;
+  }
 }
 
 export function useAuth(): AuthState {
@@ -48,15 +60,14 @@ export function useAuth(): AuthState {
     initRef.current = true;
 
     const initAuth = async () => {
-      // Check if Auth0 is configured
-      if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
-        console.warn('Auth0 not configured. Set NEXT_PUBLIC_AUTH0_DOMAIN and NEXT_PUBLIC_AUTH0_CLIENT_ID environment variables.');
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const client = await getAuth0Client();
+
+        if (!client) {
+          // Auth0 not configured or failed to initialize
+          setIsLoading(false);
+          return;
+        }
 
         // Check if returning from Auth0 redirect
         const query = window.location.search;
@@ -89,13 +100,13 @@ export function useAuth(): AuthState {
   }, []);
 
   const login = useCallback(async () => {
-    if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
-      console.error('Auth0 not configured. Please set environment variables.');
-      return;
-    }
-
     try {
       const client = await getAuth0Client();
+
+      if (!client) {
+        console.error('Auth0 not configured. Please set environment variables.');
+        return;
+      }
 
       // Use popup for Tauri desktop app (redirect doesn't work well with Tauri)
       await client.loginWithPopup({
@@ -120,11 +131,13 @@ export function useAuth(): AuthState {
   const logout = useCallback(async () => {
     try {
       const client = await getAuth0Client();
-      await client.logout({
-        logoutParams: {
-          returnTo: window.location.origin,
-        },
-      });
+      if (client) {
+        await client.logout({
+          logoutParams: {
+            returnTo: window.location.origin,
+          },
+        });
+      }
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
