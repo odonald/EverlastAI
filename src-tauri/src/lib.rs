@@ -22,18 +22,29 @@ pub fn run() {
 
             #[cfg(desktop)]
             {
-                let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::Space);
+                // Use Cmd/Ctrl + Shift + R for "Record"
+                let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyR);
 
-                app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
+                // Register the callback
+                if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
                         // Emit event to frontend
                         if let Some(window) = handle.get_webview_window("main") {
                             let _ = window.eval("window.dispatchEvent(new Event('toggle-recording'))");
                         }
                     }
-                })?;
+                }) {
+                    eprintln!("Failed to set shortcut callback: {}", e);
+                }
 
-                app.global_shortcut().register(shortcut)?;
+                // Try to register the shortcut, but don't crash if it fails
+                match app.global_shortcut().register(shortcut) {
+                    Ok(_) => println!("Global hotkey registered: Cmd+Shift+R"),
+                    Err(e) => {
+                        eprintln!("Failed to register global hotkey: {}. The app will still work, but hotkey activation is disabled.", e);
+                        eprintln!("On macOS, you may need to grant Accessibility permissions in System Preferences > Privacy & Security > Accessibility");
+                    }
+                }
             }
 
             Ok(())

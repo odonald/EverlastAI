@@ -11,7 +11,7 @@ export function HotkeyIndicator() {
     setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
   }, []);
 
-  const hotkey = isMac ? '⌘ + Shift + Space' : 'Ctrl + Shift + Space';
+  const hotkey = isMac ? '⌘ + Shift + R' : 'Ctrl + Shift + R';
 
   return (
     <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-1.5">

@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS: Settings = {
   transcriptionProvider: 'deepgram',
   llmProvider: 'openai',
   enrichmentMode: 'auto',
-  hotkey: 'CommandOrControl+Shift+Space',
+  hotkey: 'CommandOrControl+Shift+R',
 };
 
 interface SettingsStore {
