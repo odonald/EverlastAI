@@ -57,6 +57,16 @@ const useSettingsStore = create<SettingsStore>()(
           // They should go to secure storage
         },
       }),
+      // Handle corrupted localStorage gracefully
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Failed to rehydrate settings, using defaults:', error);
+          // Clear corrupted data
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('everlast-settings');
+          }
+        }
+      },
     }
   )
 );

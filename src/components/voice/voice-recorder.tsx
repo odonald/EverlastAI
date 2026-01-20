@@ -24,8 +24,18 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
   const { settings } = useSettings();
 
   const startRecording = useCallback(async () => {
+    console.log('startRecording called');
     try {
+      // Check if mediaDevices API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('MediaDevices API not available');
+        alert('Microphone access is not available. On macOS, you may need to build the app (pnpm tauri:build) and grant microphone permission, or try running in a browser at http://localhost:3000');
+        return;
+      }
+
+      console.log('Requesting microphone access...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted');
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -55,6 +65,7 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
       };
 
       mediaRecorder.onstop = async () => {
+        console.log('Recording stopped, processing audio...');
         // Clean up audio analysis
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
@@ -62,11 +73,18 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
         setAudioLevel(0);
 
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        console.log('Audio blob created:', audioBlob.size, 'bytes');
         stream.getTracks().forEach((track) => track.stop());
 
         setIsTranscribing(true);
         try {
-          const text = await transcribe(audioBlob, settings.transcriptionProvider);
+          console.log('Starting transcription with provider:', settings.transcriptionProvider);
+          const apiKey = settings.transcriptionProvider === 'deepgram'
+            ? settings.apiKeys.deepgram
+            : settings.apiKeys.elevenlabs;
+          console.log('API key available:', apiKey ? 'yes' : 'no');
+          const text = await transcribe(audioBlob, settings.transcriptionProvider, apiKey);
+          console.log('Transcription result:', text);
           onTranscriptionComplete(text);
         } catch (error) {
           console.error('Transcription failed:', error);

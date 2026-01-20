@@ -1,10 +1,12 @@
 import { getApiKey } from '@/lib/storage';
 
-export async function transcribeWithDeepgram(audioBlob: Blob): Promise<string> {
-  const apiKey = await getApiKey('deepgram');
+export async function transcribeWithDeepgram(audioBlob: Blob, providedKey?: string): Promise<string> {
+  console.log('transcribeWithDeepgram called');
+  const apiKey = providedKey || await getApiKey('deepgram');
+  console.log('Deepgram API key:', apiKey ? `${apiKey.slice(0, 8)}...` : 'NOT FOUND');
 
   if (!apiKey) {
-    throw new Error('Deepgram API key not configured');
+    throw new Error('Deepgram API key not configured. Please add your API key in Settings.');
   }
 
   const arrayBuffer = await audioBlob.arrayBuffer();

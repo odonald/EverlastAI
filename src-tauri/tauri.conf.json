@@ -44,7 +44,11 @@
     "shortDescription": "Voice to Enriched Text",
     "longDescription": "Transform your voice into structured, AI-enriched content with EverlastAI",
     "macOS": {
-      "minimumSystemVersion": "10.13"
+      "minimumSystemVersion": "10.13",
+      "entitlements": "./entitlements.plist",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "EverlastAI needs microphone access to record your voice for transcription."
+      }
     },
     "windows": {
       "webviewInstallMode": {

@@ -21,6 +21,11 @@ interface AuthState {
 const AUTH0_DOMAIN = process.env.NEXT_PUBLIC_AUTH0_DOMAIN || '';
 const AUTH0_CLIENT_ID = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || '';
 
+// Debug: log config on load
+if (typeof window !== 'undefined') {
+  console.log('Auth0 config:', { domain: AUTH0_DOMAIN, clientId: AUTH0_CLIENT_ID ? 'set' : 'missing' });
+}
+
 // Create Auth0 client singleton
 let auth0Client: Auth0Client | null = null;
 let auth0InitError: Error | null = null;
@@ -100,29 +105,23 @@ export function useAuth(): AuthState {
   }, []);
 
   const login = useCallback(async () => {
+    console.log('Login clicked');
     try {
       const client = await getAuth0Client();
+      console.log('Auth0 client:', client ? 'initialized' : 'null');
 
       if (!client) {
         console.error('Auth0 not configured. Please set environment variables.');
         return;
       }
 
-      // Use popup for Tauri desktop app (redirect doesn't work well with Tauri)
-      await client.loginWithPopup({
+      console.log('Starting Auth0 login with redirect...');
+      // Use redirect for Tauri (popup doesn't work well in webview)
+      await client.loginWithRedirect({
         authorizationParams: {
           redirect_uri: window.location.origin,
         },
       });
-
-      const auth0User = await client.getUser();
-      if (auth0User) {
-        setUser({
-          email: auth0User.email || '',
-          name: auth0User.name,
-          picture: auth0User.picture,
-        });
-      }
     } catch (error) {
       console.error('Login failed:', error);
     }
