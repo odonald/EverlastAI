@@ -21,10 +21,10 @@ export function OutputDisplay({ content, isLoading }: OutputDisplayProps) {
 
   if (!content && !isLoading) {
     return (
-      <div className="flex w-full max-w-2xl flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-        <FileText className="mb-4 h-12 w-12 text-muted-foreground/50" />
-        <h3 className="mb-2 text-lg font-medium text-muted-foreground">No output yet</h3>
-        <p className="text-sm text-muted-foreground/75">
+      <div className="flex w-full max-w-2xl flex-col items-center justify-center rounded-xl border border-dashed p-6 text-center sm:p-8 md:p-12">
+        <FileText className="mb-3 h-8 w-8 text-muted-foreground/50 sm:mb-4 sm:h-12 sm:w-12" />
+        <h3 className="mb-1 text-base font-medium text-muted-foreground sm:mb-2 sm:text-lg">No output yet</h3>
+        <p className="text-xs text-muted-foreground/75 sm:text-sm">
           Start recording to generate enriched text output
         </p>
       </div>
@@ -33,25 +33,25 @@ export function OutputDisplay({ content, isLoading }: OutputDisplayProps) {
 
   return (
     <div className="w-full max-w-2xl">
-      <div className="relative rounded-xl border bg-card p-6">
+      <div className="relative rounded-xl border bg-card p-4 sm:p-6">
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Enriched Output</h3>
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
+          <h3 className="text-xs font-medium text-muted-foreground sm:text-sm">Enriched Output</h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCopy}
             disabled={!content || isLoading}
-            className="h-8"
+            className="h-7 text-xs sm:h-8 sm:text-sm"
           >
             {copied ? (
               <>
-                <Check className="mr-2 h-4 w-4" />
+                <Check className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
                 Copied
               </>
             ) : (
               <>
-                <Copy className="mr-2 h-4 w-4" />
+                <Copy className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
                 Copy
               </>
             )}
@@ -61,16 +61,16 @@ export function OutputDisplay({ content, isLoading }: OutputDisplayProps) {
         {/* Content */}
         <div
           className={cn(
-            'min-h-[200px] whitespace-pre-wrap text-foreground',
+            'min-h-[120px] whitespace-pre-wrap text-sm text-foreground sm:min-h-[200px] sm:text-base',
             isLoading && 'animate-pulse text-muted-foreground'
           )}
         >
           {isLoading ? (
-            <div className="space-y-3">
-              <div className="h-4 w-3/4 rounded bg-muted" />
-              <div className="h-4 w-full rounded bg-muted" />
-              <div className="h-4 w-5/6 rounded bg-muted" />
-              <div className="h-4 w-2/3 rounded bg-muted" />
+            <div className="space-y-2 sm:space-y-3">
+              <div className="h-3 w-3/4 rounded bg-muted sm:h-4" />
+              <div className="h-3 w-full rounded bg-muted sm:h-4" />
+              <div className="h-3 w-5/6 rounded bg-muted sm:h-4" />
+              <div className="h-3 w-2/3 rounded bg-muted sm:h-4" />
             </div>
           ) : (
             content

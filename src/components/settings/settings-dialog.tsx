@@ -24,10 +24,10 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-background p-0 shadow-xl">
+        <Dialog.Content className="fixed inset-2 z-50 flex flex-col rounded-xl border bg-background p-0 shadow-xl sm:inset-auto sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2">
           {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
-            <Dialog.Title className="text-lg font-semibold">Settings</Dialog.Title>
+          <div className="flex shrink-0 items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4">
+            <Dialog.Title className="text-base font-semibold sm:text-lg">Settings</Dialog.Title>
             <Dialog.Close asChild>
               <Button variant="ghost" size="icon">
                 <X className="h-4 w-4" />
@@ -36,9 +36,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           </div>
 
           {/* Tabs */}
-          <Tabs.Root value={activeTab} onValueChange={setActiveTab} className="flex">
-            {/* Sidebar */}
-            <Tabs.List className="flex w-48 flex-col gap-1 border-r p-4">
+          <Tabs.Root value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col sm:flex-row">
+            {/* Sidebar - horizontal on mobile, vertical on desktop */}
+            <Tabs.List className="flex shrink-0 gap-1 overflow-x-auto border-b p-2 sm:w-44 sm:flex-col sm:overflow-x-visible sm:border-b-0 sm:border-r sm:p-4 md:w-48">
               <TabTrigger value="api-keys" icon={Key}>
                 API Keys
               </TabTrigger>
@@ -46,12 +46,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 Transcription
               </TabTrigger>
               <TabTrigger value="llm" icon={Brain}>
-                LLM Settings
+                LLM
               </TabTrigger>
 
-              {/* Logout */}
-              <div className="mt-auto pt-4">
-                <div className="mb-3 border-t pt-3 text-xs text-muted-foreground">
+              {/* Logout - hidden on mobile, shown in sidebar on desktop */}
+              <div className="mt-auto hidden pt-4 sm:block">
+                <div className="mb-3 truncate border-t pt-3 text-xs text-muted-foreground">
                   {user?.email}
                 </div>
                 <Button
@@ -66,7 +66,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             </Tabs.List>
 
             {/* Content */}
-            <div className="flex-1 p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
               <Tabs.Content value="api-keys">
                 <ApiKeySettings />
               </Tabs.Content>
@@ -76,6 +76,18 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <Tabs.Content value="llm">
                 <LLMSettings />
               </Tabs.Content>
+            </div>
+
+            {/* Mobile logout button */}
+            <div className="shrink-0 border-t p-4 sm:hidden">
+              <Button
+                variant="ghost"
+                className="w-full justify-center gap-2 text-destructive hover:text-destructive"
+                onClick={logout}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
             </div>
           </Tabs.Root>
         </Dialog.Content>
@@ -97,12 +109,12 @@ function TabTrigger({
     <Tabs.Trigger
       value={value}
       className={cn(
-        'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium',
+        'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium sm:gap-2 sm:px-3 sm:py-2 sm:text-sm',
         'text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
         'data-[state=active]:bg-primary data-[state=active]:text-primary-foreground'
       )}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       {children}
     </Tabs.Trigger>
   );

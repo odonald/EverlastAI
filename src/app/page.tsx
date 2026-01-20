@@ -58,24 +58,26 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col">
+    <main className="flex min-h-screen flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <Mic className="h-5 w-5 text-primary-foreground" />
+      <header className="flex shrink-0 items-center justify-between border-b px-3 py-3 sm:px-6 sm:py-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary sm:h-10 sm:w-10 sm:rounded-xl">
+            <Mic className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">EverlastAI</h1>
-            <p className="text-sm text-muted-foreground">Voice to Enriched Text</p>
+            <h1 className="text-lg font-semibold sm:text-xl">EverlastAI</h1>
+            <p className="hidden text-sm text-muted-foreground sm:block">Voice to Enriched Text</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <HotkeyIndicator />
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden md:block">
+            <HotkeyIndicator />
+          </div>
           {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="hidden text-sm text-muted-foreground lg:block">{user?.email}</span>
               <Button variant="ghost" size="icon" onClick={() => setSettingsOpen(true)}>
                 <Settings className="h-5 w-5" />
               </Button>
@@ -87,11 +89,11 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-8 p-8">
+      <div className="flex min-h-0 flex-1 flex-col items-center gap-4 overflow-y-auto p-4 sm:gap-6 sm:p-6 md:gap-8 md:p-8">
         {!isAuthenticated ? (
-          <div className="text-center">
-            <h2 className="mb-4 text-2xl font-semibold">Welcome to EverlastAI</h2>
-            <p className="mb-6 text-muted-foreground">
+          <div className="flex flex-1 flex-col items-center justify-center text-center">
+            <h2 className="mb-3 text-xl font-semibold sm:mb-4 sm:text-2xl">Welcome to EverlastAI</h2>
+            <p className="mb-4 max-w-md text-sm text-muted-foreground sm:mb-6 sm:text-base">
               Sign in to start transforming your voice into structured content.
             </p>
             <LoginButton />

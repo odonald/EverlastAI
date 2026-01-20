@@ -140,13 +140,13 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
   const isLoading = isTranscribing || isProcessing;
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex shrink-0 flex-col items-center gap-4 sm:gap-6">
       {/* Recording Button */}
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isLoading}
         className={cn(
-          'relative flex h-32 w-32 items-center justify-center rounded-full transition-all',
+          'relative flex h-24 w-24 items-center justify-center rounded-full transition-all sm:h-32 sm:w-32',
           'focus:outline-none focus:ring-4 focus:ring-primary/30',
           isRecording
             ? 'bg-red-500 hover:bg-red-600'
@@ -160,11 +160,11 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
         )}
 
         {isLoading ? (
-          <Loader2 className="h-12 w-12 animate-spin text-white" />
+          <Loader2 className="h-8 w-8 animate-spin text-white sm:h-12 sm:w-12" />
         ) : isRecording ? (
-          <Square className="h-12 w-12 text-white" />
+          <Square className="h-8 w-8 text-white sm:h-12 sm:w-12" />
         ) : (
-          <Mic className="h-12 w-12 text-white" />
+          <Mic className="h-8 w-8 text-white sm:h-12 sm:w-12" />
         )}
       </button>
 
@@ -172,7 +172,7 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
       <AudioVisualizer level={audioLevel} isRecording={isRecording} />
 
       {/* Status Text */}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground sm:text-sm">
         {isLoading
           ? isTranscribing
             ? 'Transcribing...'
@@ -181,7 +181,6 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
             ? 'Recording... Click to stop'
             : 'Click to start recording'}
       </p>
-
     </div>
   );
 }

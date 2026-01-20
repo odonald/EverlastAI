@@ -11,21 +11,19 @@ export function HotkeyIndicator() {
     setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
   }, []);
 
-  const hotkey = isMac ? '⌘ + Shift + R' : 'Ctrl + Shift + R';
+  const hotkey = isMac ? '⌘+Shift+R' : 'Ctrl+Shift+R';
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-1.5">
-      <Keyboard className="h-4 w-4 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">Press</span>
+    <div className="flex items-center gap-1.5 rounded-lg border bg-muted/50 px-2 py-1 lg:gap-2 lg:px-3 lg:py-1.5">
+      <Keyboard className="h-3.5 w-3.5 text-muted-foreground lg:h-4 lg:w-4" />
       <kbd
         className={cn(
-          'rounded border bg-background px-2 py-0.5 text-xs font-mono font-medium',
+          'rounded border bg-background px-1.5 py-0.5 text-[10px] font-mono font-medium lg:px-2 lg:text-xs',
           'text-foreground shadow-sm'
         )}
       >
         {hotkey}
       </kbd>
-      <span className="text-sm text-muted-foreground">to activate</span>
     </div>
   );
 }

@@ -10,10 +10,10 @@ interface AudioVisualizerProps {
 export function AudioVisualizer({ level, isRecording }: AudioVisualizerProps) {
   const bars = 12;
   const baseHeight = 4;
-  const maxAdditionalHeight = 48;
+  const maxAdditionalHeight = 36;
 
   return (
-    <div className="flex h-16 items-center justify-center gap-[3px]">
+    <div className="flex h-12 items-center justify-center gap-[2px] sm:h-16 sm:gap-[3px]">
       {Array.from({ length: bars }).map((_, i) => {
         // Create a wave-like pattern from center
         const center = Math.floor(bars / 2);
@@ -30,7 +30,7 @@ export function AudioVisualizer({ level, isRecording }: AudioVisualizerProps) {
           <div
             key={i}
             className={cn(
-              'w-1.5 rounded-full transition-all duration-100',
+              'w-1 rounded-full transition-all duration-100 sm:w-1.5',
               isRecording
                 ? level > 0.1
                   ? 'bg-green-500'
