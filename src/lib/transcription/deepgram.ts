@@ -10,22 +10,27 @@ export async function transcribeWithDeepgram(audioBlob: Blob, providedKey?: stri
   }
 
   const arrayBuffer = await audioBlob.arrayBuffer();
+  console.log('Audio blob type:', audioBlob.type, 'size:', audioBlob.size, 'bytes');
 
   const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', {
     method: 'POST',
     headers: {
       'Authorization': `Token ${apiKey}`,
-      'Content-Type': audioBlob.type,
+      'Content-Type': audioBlob.type || 'audio/webm',
     },
     body: arrayBuffer,
   });
 
+  console.log('Deepgram response status:', response.status);
+
   if (!response.ok) {
     const error = await response.text();
+    console.error('Deepgram error response:', error);
     throw new Error(`Deepgram transcription failed: ${error}`);
   }
 
   const result = await response.json();
+  console.log('Deepgram result:', JSON.stringify(result, null, 2));
 
   return result.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
 }

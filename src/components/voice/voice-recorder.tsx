@@ -82,12 +82,27 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
           const apiKey = settings.transcriptionProvider === 'deepgram'
             ? settings.apiKeys.deepgram
             : settings.apiKeys.elevenlabs;
-          console.log('API key available:', apiKey ? 'yes' : 'no');
+          console.log('API key available:', apiKey ? `yes (${apiKey.slice(0, 8)}...)` : 'NO - Please add API key in Settings');
+
+          if (!apiKey) {
+            alert(`Please add your ${settings.transcriptionProvider === 'deepgram' ? 'Deepgram' : 'ElevenLabs'} API key in Settings.`);
+            setIsTranscribing(false);
+            return;
+          }
+
           const text = await transcribe(audioBlob, settings.transcriptionProvider, apiKey);
           console.log('Transcription result:', text);
-          onTranscriptionComplete(text);
+
+          if (!text) {
+            console.warn('Empty transcription result');
+            onTranscriptionComplete('[No speech detected]');
+          } else {
+            onTranscriptionComplete(text);
+          }
         } catch (error) {
           console.error('Transcription failed:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          alert(`Transcription failed: ${errorMessage}`);
         } finally {
           setIsTranscribing(false);
         }
@@ -166,6 +181,20 @@ export function VoiceRecorder({ onTranscriptionComplete, isProcessing }: VoiceRe
             ? 'Recording... Click to stop'
             : 'Click to start recording'}
       </p>
+
+      {/* Audio level indicator during recording */}
+      {isRecording && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Level:</span>
+          <div className="h-2 w-32 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full bg-green-500 transition-all duration-75"
+              style={{ width: `${Math.min(100, audioLevel * 100)}%` }}
+            />
+          </div>
+          <span>{Math.round(audioLevel * 100)}%</span>
+        </div>
+      )}
     </div>
   );
 }
