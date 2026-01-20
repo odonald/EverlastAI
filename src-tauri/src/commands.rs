@@ -43,7 +43,7 @@ pub async fn save_api_key(key_type: String, key: String) -> Result<(), String> {
 
     if key.is_empty() {
         // Delete key if empty string is provided
-        match entry.delete_credential() {
+        match entry.delete_password() {
             Ok(_) => Ok(()),
             Err(keyring::Error::NoEntry) => Ok(()),
             Err(e) => Err(format!("Failed to delete API key: {}", e)),
@@ -59,7 +59,7 @@ pub async fn save_api_key(key_type: String, key: String) -> Result<(), String> {
 pub async fn delete_api_key(key_type: String) -> Result<(), String> {
     let entry = get_keyring_entry(&key_type)?;
 
-    match entry.delete_credential() {
+    match entry.delete_password() {
         Ok(_) => Ok(()),
         Err(keyring::Error::NoEntry) => Ok(()),
         Err(e) => Err(format!("Failed to delete API key: {}", e)),
