@@ -6,20 +6,33 @@ import { cn } from '@/lib/utils';
 
 const PROVIDERS = [
   {
-    id: 'openai',
+    id: 'openai' as const,
     name: 'OpenAI',
     model: 'GPT-4',
     description: 'Powerful general-purpose language model with excellent reasoning',
     features: ['Advanced reasoning', 'Code understanding', 'Creative writing'],
+    requiresApiKey: true,
+    isLocal: false,
   },
   {
-    id: 'anthropic',
+    id: 'anthropic' as const,
     name: 'Anthropic',
     model: 'Claude',
     description: 'Thoughtful AI assistant with strong analytical capabilities',
     features: ['Long context', 'Careful analysis', 'Structured output'],
+    requiresApiKey: true,
+    isLocal: false,
   },
-] as const;
+  {
+    id: 'ollama' as const,
+    name: 'Ollama (Local)',
+    model: 'Llama, Mistral, etc.',
+    description: 'Run open source LLMs locally - free and private',
+    features: ['Free & Open Source', 'Privacy-focused', 'Many models'],
+    requiresApiKey: false,
+    isLocal: true,
+  },
+];
 
 const ENRICHMENT_MODES = [
   { id: 'auto', name: 'Auto-detect', description: 'Automatically determine the best format' },
@@ -31,6 +44,13 @@ const ENRICHMENT_MODES = [
 
 export function LLMSettings() {
   const { settings, updateSettings, saveSettings, isSaving } = useSettings();
+
+  const canSelectProvider = (provider: typeof PROVIDERS[number]) => {
+    if (provider.isLocal) return true;
+    if (provider.id === 'openai') return !!settings.apiKeys.openai;
+    if (provider.id === 'anthropic') return !!settings.apiKeys.anthropic;
+    return false;
+  };
 
   return (
     <div className="space-y-6">
@@ -47,27 +67,34 @@ export function LLMSettings() {
         <div className="grid gap-3 sm:grid-cols-2">
           {PROVIDERS.map((provider) => {
             const isSelected = settings.llmProvider === provider.id;
-            const hasKey = settings.apiKeys[provider.id as keyof typeof settings.apiKeys];
+            const canSelect = canSelectProvider(provider);
 
             return (
               <button
                 key={provider.id}
                 onClick={() => updateSettings({ llmProvider: provider.id })}
-                disabled={!hasKey}
+                disabled={!canSelect}
                 className={cn(
                   'rounded-lg border p-4 text-left transition-all',
                   isSelected
                     ? 'border-primary bg-primary/5 ring-2 ring-primary'
                     : 'border-border hover:border-primary/50',
-                  !hasKey && 'cursor-not-allowed opacity-50'
+                  !canSelect && 'cursor-not-allowed opacity-50'
                 )}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">{provider.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{provider.name}</h4>
+                      {provider.isLocal && (
+                        <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-xs text-green-600 dark:text-green-400">
+                          Local
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">{provider.model}</p>
                   </div>
-                  {!hasKey && (
+                  {provider.requiresApiKey && !canSelect && (
                     <span className="rounded bg-muted px-2 py-0.5 text-xs">No key</span>
                   )}
                 </div>
@@ -76,6 +103,43 @@ export function LLMSettings() {
           })}
         </div>
       </div>
+
+      {/* Ollama configuration */}
+      {settings.llmProvider === 'ollama' && (
+        <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Ollama Server Endpoint</label>
+            <input
+              type="text"
+              value={settings.ollamaEndpoint}
+              onChange={(e) => updateSettings({ ollamaEndpoint: e.target.value })}
+              placeholder="http://localhost:11434"
+              className={cn(
+                'w-full rounded-lg border bg-background px-3 py-2 text-sm',
+                'placeholder:text-muted-foreground',
+                'focus:outline-none focus:ring-2 focus:ring-primary'
+              )}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Model Name</label>
+            <input
+              type="text"
+              value={settings.ollamaModel}
+              onChange={(e) => updateSettings({ ollamaModel: e.target.value })}
+              placeholder="llama3.2"
+              className={cn(
+                'w-full rounded-lg border bg-background px-3 py-2 text-sm',
+                'placeholder:text-muted-foreground',
+                'focus:outline-none focus:ring-2 focus:ring-primary'
+              )}
+            />
+            <p className="text-xs text-muted-foreground">
+              Run <code className="rounded bg-muted px-1">ollama pull llama3.2</code> to download a model
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Enrichment Mode */}
       <div className="space-y-3">

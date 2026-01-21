@@ -9,30 +9,24 @@ const keyCache = new Map<ApiKeyType, string>();
  * In browser: Falls back to localStorage (dev only)
  */
 export async function getApiKey(type: ApiKeyType): Promise<string | null> {
-  console.log(`getApiKey called for: ${type}`);
   // Check cache first
   const cached = keyCache.get(type);
   if (cached) {
-    console.log(`Found ${type} in cache`);
     return cached;
   }
 
   try {
     if (typeof window !== 'undefined' && window.__TAURI__) {
-      console.log(`Using Tauri storage for ${type}`);
       // Use Tauri's secure storage
       const { invoke } = await import('@tauri-apps/api/core');
       const key = await invoke<string | null>('get_api_key', { keyType: type });
-      console.log(`Tauri returned for ${type}:`, key ? 'found' : 'not found');
       if (key) {
         keyCache.set(type, key);
       }
       return key;
     } else {
-      console.log(`Using localStorage fallback for ${type}`);
       // Fallback for development in browser
       const stored = localStorage.getItem(`everlast_key_${type}`);
-      console.log(`localStorage returned for ${type}:`, stored ? 'found' : 'not found');
       if (stored) {
         keyCache.set(type, stored);
       }

@@ -1,26 +1,31 @@
 import { enrichWithOpenAI } from './openai';
 import { enrichWithClaude } from './claude';
+import { enrichWithOllama } from './ollama';
 
-export type LLMProvider = 'openai' | 'anthropic';
+export type LLMProvider = 'openai' | 'anthropic' | 'ollama';
 export type EnrichmentMode = 'auto' | 'notes' | 'summary' | 'action-items' | 'format';
 
 export interface EnrichmentOptions {
   provider: LLMProvider;
   mode: EnrichmentMode;
   apiKey?: string;
+  ollamaEndpoint?: string;
+  ollamaModel?: string;
 }
 
 export async function enrich(
   text: string,
   options: EnrichmentOptions
 ): Promise<string> {
-  const { provider, mode, apiKey } = options;
+  const { provider, mode, apiKey, ollamaEndpoint, ollamaModel } = options;
 
   switch (provider) {
     case 'openai':
       return enrichWithOpenAI(text, mode, apiKey);
     case 'anthropic':
       return enrichWithClaude(text, mode, apiKey);
+    case 'ollama':
+      return enrichWithOllama(text, mode, ollamaEndpoint, ollamaModel);
     default:
       throw new Error(`Unknown LLM provider: ${provider}`);
   }

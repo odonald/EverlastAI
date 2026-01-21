@@ -14,21 +14,32 @@
     "windows": [
       {
         "title": "EverlastAI",
-        "width": 900,
-        "height": 700,
-        "minWidth": 600,
-        "minHeight": 500,
+        "width": 400,
+        "height": 550,
+        "minWidth": 350,
+        "minHeight": 450,
+        "maxWidth": 500,
+        "maxHeight": 700,
         "center": true,
         "resizable": true,
         "decorations": true,
-        "transparent": false
+        "transparent": false,
+        "visible": true,
+        "skipTaskbar": false
       }
     ],
     "security": {
       "csp": "default-src 'self'; connect-src 'self' https://*.auth0.com https://api.deepgram.com https://api.elevenlabs.io https://api.openai.com https://api.anthropic.com wss://api.deepgram.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.auth0.com https://*.gravatar.com; media-src 'self' blob:; font-src 'self' data:; frame-src 'self' https://*.auth0.com"
     }
   },
-  "plugins": {},
+  "plugins": {
+    "deep-link": {
+      "mobile": [],
+      "desktop": {
+        "schemes": ["everlastai"]
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "icon": [

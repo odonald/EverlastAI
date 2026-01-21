@@ -5,6 +5,10 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "core:window:allow-is-visible",
     "shell:allow-open",
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
@@ -15,6 +19,10 @@
     "store:allow-keys",
     "store:allow-clear",
     "store:allow-load",
-    "store:allow-save"
+    "store:allow-save",
+    "core:menu:default",
+    "core:tray:default",
+    "deep-link:default",
+    "core:event:default"
   ]
 }

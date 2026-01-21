@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useAuth } from '@/hooks/use-auth';
 
 export interface Settings {
   apiKeys: {
@@ -11,10 +12,14 @@ export interface Settings {
     openai: string;
     anthropic: string;
   };
-  transcriptionProvider: 'deepgram' | 'elevenlabs';
-  llmProvider: 'openai' | 'anthropic';
+  transcriptionProvider: 'deepgram' | 'elevenlabs' | 'whisper';
+  llmProvider: 'openai' | 'anthropic' | 'ollama';
   enrichmentMode: 'auto' | 'notes' | 'summary' | 'action-items' | 'format';
   hotkey: string;
+  // Local/Open Source settings
+  whisperEndpoint: string;
+  ollamaEndpoint: string;
+  ollamaModel: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -28,6 +33,10 @@ const DEFAULT_SETTINGS: Settings = {
   llmProvider: 'openai',
   enrichmentMode: 'auto',
   hotkey: 'CommandOrControl+Shift+R',
+  // Local defaults
+  whisperEndpoint: 'http://localhost:8080',
+  ollamaEndpoint: 'http://localhost:11434',
+  ollamaModel: 'llama3.2',
 };
 
 interface SettingsStore {
@@ -76,6 +85,7 @@ const useSettingsStore = create<SettingsStore>()(
 export function useSettings() {
   const { settings, setSettings, resetSettings } = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
   // Hydrate on client side
   useEffect(() => {
@@ -92,10 +102,13 @@ export function useSettings() {
   const saveSettings = useCallback(async () => {
     setIsSaving(true);
     try {
-      // In production with Tauri, save API keys to secure storage
-      if (typeof window !== 'undefined' && window.__TAURI__) {
+      // In production with Tauri, save API keys to secure storage (per-user)
+      if (typeof window !== 'undefined' && window.__TAURI__ && user?.email) {
         const { invoke } = await import('@tauri-apps/api/core');
-        await invoke('save_api_keys', { keys: settings.apiKeys });
+        await invoke('save_api_keys', {
+          keys: settings.apiKeys,
+          userId: user.email,
+        });
       }
       // Settings are automatically persisted via zustand
     } catch (error) {
@@ -104,26 +117,59 @@ export function useSettings() {
     } finally {
       setIsSaving(false);
     }
-  }, [settings.apiKeys]);
+  }, [settings.apiKeys, user?.email]);
 
-  // Load API keys from secure storage on mount
+  // Load API keys from secure storage when user changes
   useEffect(() => {
     const loadSecureKeys = async () => {
-      if (typeof window !== 'undefined' && window.__TAURI__) {
-        try {
-          const { invoke } = await import('@tauri-apps/api/core');
-          const keys = await invoke<typeof settings.apiKeys>('get_api_keys');
-          if (keys) {
-            setSettings({ apiKeys: keys });
+      // Only load keys in Tauri and when we have a user
+      if (typeof window === 'undefined' || !window.__TAURI__) {
+        return;
+      }
+
+      // If no user, clear keys from UI (don't load anonymous keys)
+      if (!user?.email) {
+        setSettings({
+          apiKeys: {
+            deepgram: '',
+            elevenlabs: '',
+            openai: '',
+            anthropic: '',
           }
-        } catch (error) {
-          console.error('Failed to load API keys:', error);
+        });
+        return;
+      }
+
+      // User is logged in - load their keys
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        const keys = await invoke<Settings['apiKeys']>('get_api_keys', {
+          userId: user.email,
+        });
+
+        // Check if keys have any actual values
+        const hasKeys = keys && (keys.deepgram || keys.elevenlabs || keys.openai || keys.anthropic);
+
+        if (hasKeys) {
+          setSettings({ apiKeys: keys });
+        } else {
+          // New user or no keys saved yet - start with empty
+          setSettings({
+            apiKeys: {
+              deepgram: '',
+              elevenlabs: '',
+              openai: '',
+              anthropic: '',
+            }
+          });
         }
+      } catch (error) {
+        console.error('Failed to load API keys:', error);
       }
     };
 
     loadSecureKeys();
-  }, [setSettings]);
+  }, [setSettings, user?.email]);
 
   return {
     settings,

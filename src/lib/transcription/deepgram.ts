@@ -1,16 +1,13 @@
 import { getApiKey } from '@/lib/storage';
 
 export async function transcribeWithDeepgram(audioBlob: Blob, providedKey?: string): Promise<string> {
-  console.log('transcribeWithDeepgram called');
   const apiKey = providedKey || await getApiKey('deepgram');
-  console.log('Deepgram API key:', apiKey ? `${apiKey.slice(0, 8)}...` : 'NOT FOUND');
 
   if (!apiKey) {
     throw new Error('Deepgram API key not configured. Please add your API key in Settings.');
   }
 
   const arrayBuffer = await audioBlob.arrayBuffer();
-  console.log('Audio blob type:', audioBlob.type, 'size:', audioBlob.size, 'bytes');
 
   const response = await fetch('https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true', {
     method: 'POST',
@@ -21,16 +18,12 @@ export async function transcribeWithDeepgram(audioBlob: Blob, providedKey?: stri
     body: arrayBuffer,
   });
 
-  console.log('Deepgram response status:', response.status);
-
   if (!response.ok) {
     const error = await response.text();
-    console.error('Deepgram error response:', error);
     throw new Error(`Deepgram transcription failed: ${error}`);
   }
 
   const result = await response.json();
-  console.log('Deepgram result:', JSON.stringify(result, null, 2));
 
   return result.results?.channels?.[0]?.alternatives?.[0]?.transcript || '';
 }

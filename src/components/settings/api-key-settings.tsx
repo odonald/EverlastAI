@@ -76,7 +76,7 @@ export function ApiKeySettings() {
           <div className="text-sm">
             <p className="font-medium text-yellow-500">Security Notice</p>
             <p className="text-muted-foreground">
-              API keys are stored securely in your system keychain and never sent to our servers.
+              API keys are stored locally on your device and never sent to our servers.
             </p>
           </div>
         </div>

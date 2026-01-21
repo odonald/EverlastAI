@@ -8,7 +8,6 @@ export function LoginButton() {
   const { login } = useAuth();
 
   const handleClick = () => {
-    console.log('Sign In button clicked');
     login();
   };
 
