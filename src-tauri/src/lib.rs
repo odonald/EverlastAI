@@ -42,10 +42,12 @@ pub fn run() {
                 // Register the callback
                 if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
-                        if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            // Emit Tauri event instead of window.eval() - works even when window is hidden
-                            // This allows true background recording from any app
-                            let _ = window.emit("toggle-recording", ());
+                        println!("Global hotkey pressed! Emitting toggle-recording event...");
+                        // Emit app-level event - works even when window is hidden/unfocused
+                        // This allows true background recording from any app
+                        match hotkey_handle.emit("toggle-recording", ()) {
+                            Ok(_) => println!("Event emitted successfully"),
+                            Err(e) => eprintln!("Failed to emit event: {}", e),
                         }
                     }
                 }) {

@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-We take the security of EverlastAI seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+We take the security of EverlastAI recording app seriously. If you believe you have found a security vulnerability, please report it to us as described below.
 
 ### How to Report
 
@@ -20,7 +20,7 @@ Instead, please report them via GitHub's private vulnerability reporting:
 2. Click "New draft security advisory"
 3. Fill in the details of the vulnerability
 
-Alternatively, you can email us at **security@everlastai.app**.
+Alternatively, you can email us at **hello@zynderlab.com**.
 
 ### What to Include
 

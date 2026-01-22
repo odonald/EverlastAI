@@ -573,29 +573,49 @@ export function LiveRecorder({
     beginRecording();
   }, [initializeSession, beginRecording]);
 
-  // Global hotkey listener - uses Tauri events which work even when window is hidden
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
+  // Ref to hold the latest handler function (avoids stale closures in event listeners)
+  const hotkeyHandlerRef = useRef<() => void>(() => {});
 
-    const handleHotkey = () => {
+  // Update the handler ref whenever dependencies change
+  useEffect(() => {
+    hotkeyHandlerRef.current = () => {
+      console.log('[Hotkey] Event received', { isRecording, countdown, isProcessing, hasRequiredKeys, hasFocus: document.hasFocus() });
+
       if (isRecording || countdown !== null) {
         // If recording or counting down, stop/cancel
         if (countdown !== null) {
-          // Cancel during countdown - cleanup initialized resources
+          console.log('[Hotkey] Canceling countdown');
           cancelSession();
         } else {
+          console.log('[Hotkey] Stopping recording');
           stopRecording();
         }
       } else if (!isProcessing && hasRequiredKeys) {
+        console.log('[Hotkey] Starting new recording');
         setIsSessionActive(true);
         // If window is focused (app in foreground), use countdown
         // If window is not focused (app in background), start immediately
         if (document.hasFocus()) {
+          console.log('[Hotkey] Window focused - using countdown');
           startWithCountdown();
         } else {
+          console.log('[Hotkey] Window not focused - starting immediately');
           startImmediately();
         }
+      } else {
+        console.log('[Hotkey] Cannot start - processing:', isProcessing, 'hasKeys:', hasRequiredKeys);
       }
+    };
+  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
+
+  // Set up event listeners once on mount
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let mounted = true;
+
+    // Wrapper that calls the current handler ref
+    const handleHotkey = () => {
+      hotkeyHandlerRef.current();
     };
 
     // Set up Tauri event listener (works in background)
@@ -603,9 +623,15 @@ export function LiveRecorder({
       if (typeof window !== 'undefined' && window.__TAURI__) {
         try {
           const { listen } = await import('@tauri-apps/api/event');
-          unlisten = await listen('toggle-recording', handleHotkey);
+          if (mounted) {
+            unlisten = await listen('toggle-recording', () => {
+              console.log('[Tauri] toggle-recording event received');
+              handleHotkey();
+            });
+            console.log('[Tauri] Event listener registered successfully');
+          }
         } catch (e) {
-          console.error('Failed to set up Tauri event listener:', e);
+          console.error('[Tauri] Failed to set up event listener:', e);
         }
       }
     };
@@ -616,12 +642,13 @@ export function LiveRecorder({
     window.addEventListener('toggle-recording', handleHotkey);
 
     return () => {
+      mounted = false;
       if (unlisten) {
         unlisten();
       }
       window.removeEventListener('toggle-recording', handleHotkey);
     };
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
+  }, []); // Empty deps - only run once on mount
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
