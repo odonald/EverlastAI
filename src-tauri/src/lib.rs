@@ -4,7 +4,7 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Listener, Manager, WindowEvent,
+    Emitter, Listener, Manager, WindowEvent,
 };
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
@@ -43,9 +43,9 @@ pub fn run() {
                 if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
                         if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            // Dispatch toggle-recording event WITHOUT showing window
-                            // This allows true background recording
-                            let _ = window.eval("window.dispatchEvent(new Event('toggle-recording'))");
+                            // Emit Tauri event instead of window.eval() - works even when window is hidden
+                            // This allows true background recording from any app
+                            let _ = window.emit("toggle-recording", ());
                         }
                     }
                 }) {

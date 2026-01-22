@@ -573,8 +573,10 @@ export function LiveRecorder({
     beginRecording();
   }, [initializeSession, beginRecording]);
 
-  // Global hotkey listener
+  // Global hotkey listener - uses Tauri events which work even when window is hidden
   useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
     const handleHotkey = () => {
       if (isRecording || countdown !== null) {
         // If recording or counting down, stop/cancel
@@ -596,8 +598,29 @@ export function LiveRecorder({
       }
     };
 
+    // Set up Tauri event listener (works in background)
+    const setupTauriListener = async () => {
+      if (typeof window !== 'undefined' && window.__TAURI__) {
+        try {
+          const { listen } = await import('@tauri-apps/api/event');
+          unlisten = await listen('toggle-recording', handleHotkey);
+        } catch (e) {
+          console.error('Failed to set up Tauri event listener:', e);
+        }
+      }
+    };
+
+    setupTauriListener();
+
+    // Also listen for DOM events as fallback (for non-Tauri environments)
     window.addEventListener('toggle-recording', handleHotkey);
-    return () => window.removeEventListener('toggle-recording', handleHotkey);
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+      window.removeEventListener('toggle-recording', handleHotkey);
+    };
   }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
 
   const formatDuration = (seconds: number) => {
