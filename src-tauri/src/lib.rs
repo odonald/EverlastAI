@@ -23,6 +23,12 @@ pub fn run() {
             commands::save_api_keys,
             commands::set_recording_state,
             commands::get_recording_state,
+            // Session storage commands
+            commands::list_sessions,
+            commands::save_session,
+            commands::get_session,
+            commands::delete_session,
+            commands::update_session_metadata,
         ])
         .setup(|app| {
             // Register global hotkey
@@ -37,13 +43,8 @@ pub fn run() {
                 if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
                         if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            // First, ensure the window is visible
-                            let was_visible = window.is_visible().unwrap_or(false);
-                            if !was_visible {
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
-                            // Then dispatch the toggle-recording event
+                            // Dispatch toggle-recording event WITHOUT showing window
+                            // This allows true background recording
                             let _ = window.eval("window.dispatchEvent(new Event('toggle-recording'))");
                         }
                     }

@@ -12,12 +12,14 @@ export async function enrichWithOllama(
   text: string,
   mode: EnrichmentMode,
   endpoint?: string,
-  model?: string
+  model?: string,
+  targetLanguage?: string,
+  customPrompt?: string
 ): Promise<string> {
   const baseUrl = endpoint || DEFAULT_OLLAMA_ENDPOINT;
   const modelName = model || DEFAULT_MODEL;
 
-  const systemPrompt = getSystemPrompt(mode);
+  const systemPrompt = getSystemPrompt(mode, targetLanguage, customPrompt);
 
   try {
     const response = await fetch(`${baseUrl}/api/generate`, {

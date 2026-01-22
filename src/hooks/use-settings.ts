@@ -1,9 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useAuth } from '@/hooks/use-auth';
+
+export interface NotionConnection {
+  accessToken: string;
+  workspaceId: string;
+  workspaceName: string;
+  workspaceIcon?: string;
+  parentPageId?: string; // Default page to export to
+  parentPageName?: string;
+}
 
 export interface Settings {
   apiKeys: {
@@ -20,15 +29,20 @@ export interface Settings {
   whisperEndpoint: string;
   ollamaEndpoint: string;
   ollamaModel: string;
+  // Integration settings
+  webhookUrl: string;
+  notion: NotionConnection | null;
 }
 
+const DEFAULT_API_KEYS: Settings['apiKeys'] = {
+  deepgram: '',
+  elevenlabs: '',
+  openai: '',
+  anthropic: '',
+};
+
 const DEFAULT_SETTINGS: Settings = {
-  apiKeys: {
-    deepgram: '',
-    elevenlabs: '',
-    openai: '',
-    anthropic: '',
-  },
+  apiKeys: DEFAULT_API_KEYS,
   transcriptionProvider: 'deepgram',
   llmProvider: 'openai',
   enrichmentMode: 'auto',
@@ -37,6 +51,9 @@ const DEFAULT_SETTINGS: Settings = {
   whisperEndpoint: 'http://localhost:8080',
   ollamaEndpoint: 'http://localhost:11434',
   ollamaModel: 'llama3.2',
+  // Integration defaults
+  webhookUrl: '',
+  notion: null,
 };
 
 interface SettingsStore {
@@ -60,12 +77,13 @@ const useSettingsStore = create<SettingsStore>()(
       name: 'everlast-settings',
       // Skip hydration during SSR
       skipHydration: true,
-      // In production, API keys should be stored in OS keychain via Tauri
+      // IMPORTANT: Exclude apiKeys from localStorage persistence
+      // API keys are stored per-user in Tauri's encrypted storage
       partialize: (state) => ({
         settings: {
           ...state.settings,
-          // Don't persist API keys to localStorage in production
-          // They should go to secure storage
+          // Explicitly set empty apiKeys - they come from secure storage
+          apiKeys: DEFAULT_API_KEYS,
         },
       }),
       // Handle corrupted localStorage gracefully
@@ -82,15 +100,103 @@ const useSettingsStore = create<SettingsStore>()(
   )
 );
 
+export interface KeyValidationStatus {
+  deepgram: boolean | null; // null = not validated yet, true = valid, false = invalid
+  elevenlabs: boolean | null;
+  openai: boolean | null;
+  anthropic: boolean | null;
+}
+
+const DEFAULT_VALIDATION: KeyValidationStatus = {
+  deepgram: null,
+  elevenlabs: null,
+  openai: null,
+  anthropic: null,
+};
+
+async function validateApiKey(provider: string, key: string): Promise<boolean> {
+  if (!key) return false;
+  try {
+    const response = await fetch('/api/validate-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, key }),
+    });
+    const result = await response.json();
+    return result.valid === true;
+  } catch {
+    return false;
+  }
+}
+
 export function useSettings() {
   const { settings, setSettings, resetSettings } = useSettingsStore();
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [keyValidation, setKeyValidation] = useState<KeyValidationStatus>(DEFAULT_VALIDATION);
   const { user } = useAuth();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedKeysRef = useRef<string>('');
+  const lastValidatedKeysRef = useRef<string>('');
 
   // Hydrate on client side
   useEffect(() => {
     useSettingsStore.persist.rehydrate();
   }, []);
+
+  // Save API keys to secure storage
+  const saveApiKeys = useCallback(async (keys: Settings['apiKeys']) => {
+    if (typeof window === 'undefined' || !window.__TAURI__ || !user?.email) {
+      return;
+    }
+
+    const keysJson = JSON.stringify(keys);
+    // Skip if keys haven't changed
+    if (keysJson === lastSavedKeysRef.current) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('save_api_keys', {
+        keys,
+        userId: user.email,
+      });
+      lastSavedKeysRef.current = keysJson;
+      console.log('[Settings] API keys saved for user:', user.email);
+    } catch (error) {
+      console.error('Failed to save API keys:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [user?.email]);
+
+  // Debounced autosave when API keys change
+  useEffect(() => {
+    // Only autosave if we have a user and keys have values
+    if (!user?.email) return;
+
+    const hasAnyKey = settings.apiKeys.deepgram || settings.apiKeys.elevenlabs ||
+                      settings.apiKeys.openai || settings.apiKeys.anthropic;
+    if (!hasAnyKey) return;
+
+    // Clear previous timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Debounce save by 500ms
+    saveTimeoutRef.current = setTimeout(() => {
+      saveApiKeys(settings.apiKeys);
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [settings.apiKeys, user?.email, saveApiKeys]);
 
   const updateSettings = useCallback(
     (newSettings: Partial<Settings>) => {
@@ -99,44 +205,27 @@ export function useSettings() {
     [setSettings]
   );
 
+  // Manual save (still available for explicit save button)
   const saveSettings = useCallback(async () => {
-    setIsSaving(true);
-    try {
-      // In production with Tauri, save API keys to secure storage (per-user)
-      if (typeof window !== 'undefined' && window.__TAURI__ && user?.email) {
-        const { invoke } = await import('@tauri-apps/api/core');
-        await invoke('save_api_keys', {
-          keys: settings.apiKeys,
-          userId: user.email,
-        });
-      }
-      // Settings are automatically persisted via zustand
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      throw error;
-    } finally {
-      setIsSaving(false);
-    }
-  }, [settings.apiKeys, user?.email]);
+    await saveApiKeys(settings.apiKeys);
+  }, [settings.apiKeys, saveApiKeys]);
 
   // Load API keys from secure storage when user changes
   useEffect(() => {
     const loadSecureKeys = async () => {
-      // Only load keys in Tauri and when we have a user
+      setIsLoading(true);
+
+      // Only load keys in Tauri
       if (typeof window === 'undefined' || !window.__TAURI__) {
+        setIsLoading(false);
         return;
       }
 
-      // If no user, clear keys from UI (don't load anonymous keys)
+      // If no user, clear keys from UI
       if (!user?.email) {
-        setSettings({
-          apiKeys: {
-            deepgram: '',
-            elevenlabs: '',
-            openai: '',
-            anthropic: '',
-          }
-        });
+        setSettings({ apiKeys: DEFAULT_API_KEYS });
+        lastSavedKeysRef.current = '';
+        setIsLoading(false);
         return;
       }
 
@@ -152,24 +241,74 @@ export function useSettings() {
 
         if (hasKeys) {
           setSettings({ apiKeys: keys });
+          lastSavedKeysRef.current = JSON.stringify(keys);
+          console.log('[Settings] Loaded API keys for user:', user.email);
         } else {
           // New user or no keys saved yet - start with empty
-          setSettings({
-            apiKeys: {
-              deepgram: '',
-              elevenlabs: '',
-              openai: '',
-              anthropic: '',
-            }
-          });
+          setSettings({ apiKeys: DEFAULT_API_KEYS });
+          lastSavedKeysRef.current = '';
         }
       } catch (error) {
         console.error('Failed to load API keys:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadSecureKeys();
   }, [setSettings, user?.email]);
+
+  // Validate API keys when they change
+  useEffect(() => {
+    // Skip validation while loading or if no keys
+    if (isLoading) return;
+
+    const keysJson = JSON.stringify(settings.apiKeys);
+    // Skip if keys haven't changed since last validation
+    if (keysJson === lastValidatedKeysRef.current) return;
+    lastValidatedKeysRef.current = keysJson;
+
+    const validateKeys = async () => {
+      const newValidation: KeyValidationStatus = { ...DEFAULT_VALIDATION };
+
+      // Only validate keys that have values
+      const validations: Promise<void>[] = [];
+
+      if (settings.apiKeys.deepgram) {
+        validations.push(
+          validateApiKey('deepgram', settings.apiKeys.deepgram).then(valid => {
+            newValidation.deepgram = valid;
+          })
+        );
+      }
+      if (settings.apiKeys.elevenlabs) {
+        validations.push(
+          validateApiKey('elevenlabs', settings.apiKeys.elevenlabs).then(valid => {
+            newValidation.elevenlabs = valid;
+          })
+        );
+      }
+      if (settings.apiKeys.openai) {
+        validations.push(
+          validateApiKey('openai', settings.apiKeys.openai).then(valid => {
+            newValidation.openai = valid;
+          })
+        );
+      }
+      if (settings.apiKeys.anthropic) {
+        validations.push(
+          validateApiKey('anthropic', settings.apiKeys.anthropic).then(valid => {
+            newValidation.anthropic = valid;
+          })
+        );
+      }
+
+      await Promise.all(validations);
+      setKeyValidation(newValidation);
+    };
+
+    validateKeys();
+  }, [settings.apiKeys, isLoading]);
 
   return {
     settings,
@@ -177,5 +316,7 @@ export function useSettings() {
     saveSettings,
     resetSettings,
     isSaving,
+    isLoading,
+    keyValidation,
   };
 }

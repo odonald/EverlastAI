@@ -1,8 +1,4 @@
-import { getApiKey } from '@/lib/storage';
-
-export async function transcribeWithElevenlabs(audioBlob: Blob, providedKey?: string): Promise<string> {
-  const apiKey = providedKey || await getApiKey('elevenlabs');
-
+export async function transcribeWithElevenlabs(audioBlob: Blob, apiKey?: string): Promise<string> {
   if (!apiKey) {
     throw new Error('ElevenLabs API key not configured. Please add your API key in Settings.');
   }

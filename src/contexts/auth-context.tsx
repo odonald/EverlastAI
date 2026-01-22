@@ -36,6 +36,27 @@ function generateSessionId(): string {
 let auth0Client: Auth0Client | null = null;
 let auth0InitError: Error | null = null;
 
+// Clear all Auth0 related data from localStorage
+function clearAuth0Cache() {
+  if (typeof window === 'undefined') return;
+
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith('@@auth0spajs@@') || key.startsWith('auth0'))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  console.log('[Auth] Cleared Auth0 cache, removed keys:', keysToRemove.length);
+}
+
+// Reset Auth0 client (force recreation on next use)
+function resetAuth0Client() {
+  auth0Client = null;
+  auth0InitError = null;
+}
+
 async function getAuth0Client(): Promise<Auth0Client | null> {
   if (auth0InitError) return null;
   if (auth0Client) return auth0Client;
@@ -122,56 +143,120 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Handle auth callback (web only)
   const handleAuthCallback = useCallback(async () => {
+    let client = await getAuth0Client();
+    if (!client) return;
+
+    const query = window.location.search;
+    if (!query.includes('code=') || !query.includes('state=')) return;
+
+    // Check if this is a Tauri auth callback BEFORE trying handleRedirectCallback
+    // because handleRedirectCallback will fail due to state mismatch (different localStorage)
+    let pendingSessionId: string | null = null;
+    if (!isTauri()) {
+      try {
+        const pendingResp = await fetch('/api/auth/session?getPending=true');
+        const pendingData = await pendingResp.json();
+        pendingSessionId = pendingData.sessionId;
+        console.log('[Auth] Pending Tauri session:', pendingSessionId);
+      } catch {
+        // Ignore
+      }
+    }
+
+    let callbackSucceeded = false;
     try {
-      const client = await getAuth0Client();
-      if (!client) return;
-
-      const query = window.location.search;
-      if (!query.includes('code=') || !query.includes('state=')) return;
-
       await client.handleRedirectCallback();
-      window.history.replaceState({}, document.title, window.location.pathname);
+      console.log('[Auth] handleRedirectCallback succeeded');
+      callbackSucceeded = true;
+    } catch (error) {
+      console.error('[Auth] handleRedirectCallback failed:', error);
 
-      const auth0User = await client.getUser();
+      // If this was a Tauri auth callback, the state mismatch is expected
+      // because Tauri and browser have different localStorage contexts.
+      // The user already authenticated with Auth0, so we can use silent auth
+      // to get tokens from their active Auth0 session.
+      if (pendingSessionId && !isTauri()) {
+        console.log('[Auth] Attempting silent auth for Tauri callback');
+        window.history.replaceState({}, document.title, window.location.pathname);
 
-      if (auth0User) {
-        let wasTauriAuth = false;
-        if (!isTauri()) {
-          try {
-            const pendingResp = await fetch('/api/auth/session?getPending=true');
-            const pendingData = await pendingResp.json();
-
-            if (pendingData.sessionId) {
-              wasTauriAuth = true;
-              await fetch('/api/auth/session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  sessionId: pendingData.sessionId,
-                  tokens: {
-                    email: auth0User.email,
-                    name: auth0User.name,
-                    picture: auth0User.picture,
-                  },
-                }),
-              });
-              sessionStorage.setItem('everlast_auth_callback', 'complete');
-            }
-          } catch {
-            // Ignore API errors
-          }
+        // IMPORTANT: Clear browser's Auth0 cache first!
+        // Otherwise getTokenSilently might return cached tokens for a different user
+        clearAuth0Cache();
+        // Reset the client to force it to reinitialize without cached data
+        resetAuth0Client();
+        // Get a fresh client
+        const freshClient = await getAuth0Client();
+        if (!freshClient) {
+          console.error('[Auth] Failed to get fresh Auth0 client');
+          return;
         }
 
-        if (!wasTauriAuth) {
-          setUser({
-            email: auth0User.email || '',
-            name: auth0User.name,
-            picture: auth0User.picture,
+        try {
+          // Try to get tokens silently with cache bypass
+          // This forces Auth0 to use the iframe flow to get fresh tokens
+          // from the Auth0 server session (which has the user who just logged in)
+          await freshClient.getTokenSilently({ cacheMode: 'off' });
+          console.log('[Auth] Silent auth succeeded');
+          callbackSucceeded = true;
+          // Update client reference for getUser call below
+          client = freshClient;
+        } catch (silentError) {
+          console.error('[Auth] Silent auth also failed:', silentError);
+          // As last resort, trigger a new login but without forcing prompt
+          // Auth0 should auto-login since session just started
+          await freshClient.loginWithRedirect({
+            authorizationParams: {
+              redirect_uri: window.location.origin,
+              prompt: 'none', // Try to skip login screen
+            },
           });
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (!callbackSucceeded) return;
+
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+    const auth0User = await client.getUser();
+    console.log('[Auth] Got user from Auth0:', auth0User?.email, auth0User?.sub);
+
+    if (auth0User) {
+      let wasTauriAuth = false;
+
+      if (pendingSessionId) {
+        wasTauriAuth = true;
+        console.log('[Auth] Storing tokens for Tauri session:', pendingSessionId);
+        try {
+          await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId: pendingSessionId,
+              tokens: {
+                email: auth0User.email,
+                name: auth0User.name,
+                picture: auth0User.picture,
+              },
+            }),
+          });
+          sessionStorage.setItem('everlast_auth_callback', 'complete');
+          console.log('[Auth] Tokens stored, Tauri can now poll');
+        } catch (err) {
+          console.error('[Auth] Failed to store tokens:', err);
         }
       }
-    } catch (error) {
-      console.error('Auth callback failed:', error);
+
+      if (!wasTauriAuth) {
+        setUser({
+          email: auth0User.email || '',
+          name: auth0User.name,
+          picture: auth0User.picture,
+        });
+      }
     }
   }, []);
 
@@ -303,28 +388,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
+      // Clear our app's user data
       localStorage.removeItem('everlast_user');
       localStorage.removeItem(PENDING_AUTH_SESSION_KEY);
 
       const client = await getAuth0Client();
       if (client) {
         if (isTauri()) {
+          // In Tauri, we need to fully clear everything locally
+          // since we can't redirect to Auth0's logout endpoint
           await client.logout({ openUrl: false });
-          window.location.reload();
         } else {
           await client.logout({
             logoutParams: { returnTo: window.location.origin },
           });
+          return; // Browser will redirect, no need to continue
         }
-      } else {
-        setUser(null);
-        if (isTauri()) {
-          window.location.reload();
-        }
+      }
+
+      // Clear Auth0's localStorage cache completely
+      clearAuth0Cache();
+      // Reset client so next login creates a fresh one
+      resetAuth0Client();
+      // Clear user state
+      setUser(null);
+
+      if (isTauri()) {
+        window.location.reload();
       }
     } catch (error) {
       console.error('Logout failed:', error);
+      // Even on error, try to clean up
       localStorage.removeItem('everlast_user');
+      clearAuth0Cache();
+      resetAuth0Client();
       setUser(null);
       if (isTauri()) {
         window.location.reload();

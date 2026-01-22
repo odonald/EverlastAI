@@ -3,13 +3,17 @@
 import { useSettings } from '@/hooks/use-settings';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Check, Zap, Shield, Globe, Mic2, Server } from 'lucide-react';
 
 const PROVIDERS = [
   {
     id: 'deepgram' as const,
     name: 'Deepgram',
     description: 'Fast, accurate real-time transcription with streaming support',
-    features: ['Real-time streaming', 'High accuracy', 'Multiple languages'],
+    features: ['Real-time streaming', 'Speaker detection', '30+ languages'],
+    icon: Zap,
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-500/10',
     requiresApiKey: true,
     isLocal: false,
   },
@@ -17,15 +21,21 @@ const PROVIDERS = [
     id: 'elevenlabs' as const,
     name: 'ElevenLabs',
     description: 'Advanced speech recognition with natural language processing',
-    features: ['Natural processing', 'Context awareness', 'Voice detection'],
+    features: ['Context awareness', 'Voice detection', 'High fidelity'],
+    icon: Globe,
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
     requiresApiKey: true,
     isLocal: false,
   },
   {
     id: 'whisper' as const,
     name: 'Whisper (Local)',
-    description: 'OpenAI Whisper running locally - free and private',
-    features: ['Free & Open Source', 'Privacy-focused', 'Offline capable'],
+    description: 'OpenAI Whisper running locally - free and completely private',
+    features: ['Free forever', 'Privacy-focused', 'Offline capable'],
+    icon: Shield,
+    color: 'text-green-500',
+    bgColor: 'bg-green-500/10',
     requiresApiKey: false,
     isLocal: true,
   },
@@ -48,67 +58,81 @@ export function TranscriptionSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Transcription Settings</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-xl font-semibold">Transcription</h3>
+        <p className="mt-1 text-muted-foreground">
           Choose your preferred speech-to-text provider.
         </p>
       </div>
 
       <div className="space-y-3">
-        {PROVIDERS.map((provider) => {
+        {PROVIDERS.map((provider, index) => {
           const isSelected = settings.transcriptionProvider === provider.id;
           const canSelect = canSelectProvider(provider);
+          const Icon = provider.icon;
 
           return (
             <button
               key={provider.id}
-              onClick={() => handleProviderChange(provider.id)}
+              onClick={() => canSelect && handleProviderChange(provider.id)}
               disabled={!canSelect}
               className={cn(
-                'w-full rounded-lg border p-4 text-left transition-all',
+                'w-full rounded-2xl border p-5 text-left transition-all duration-300 animate-fade-in-up',
                 isSelected
-                  ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                  : 'border-border hover:border-primary/50',
+                  ? 'border-primary bg-primary/5 shadow-soft ring-2 ring-primary/30'
+                  : 'border-border hover:border-primary/30 hover:shadow-soft',
                 !canSelect && 'cursor-not-allowed opacity-50'
               )}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-start justify-between">
-                <div>
+              <div className="flex items-start gap-4">
+                <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl', provider.bgColor)}>
+                  <Icon className={cn('h-6 w-6', provider.color)} />
+                </div>
+
+                <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{provider.name}</h4>
+                    <h4 className="font-semibold">{provider.name}</h4>
                     {provider.isLocal && (
-                      <span className="rounded bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
+                      <span className="rounded-full bg-green-500/10 px-2.5 py-1 text-xs font-medium text-green-600 dark:text-green-400">
                         Local
                       </span>
                     )}
                     {provider.requiresApiKey && !canSelect && (
-                      <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                      <span className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
                         No API key
                       </span>
                     )}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">{provider.description}</p>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {provider.features.map((feature) => (
+                      <span
+                        key={feature}
+                        className={cn(
+                          'rounded-full px-2.5 py-1 text-xs font-medium',
+                          isSelected
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted text-muted-foreground'
+                        )}
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Selection indicator */}
                 <div
                   className={cn(
-                    'h-4 w-4 rounded-full border-2',
-                    isSelected ? 'border-primary bg-primary' : 'border-muted-foreground'
+                    'flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all',
+                    isSelected
+                      ? 'border-primary bg-primary'
+                      : 'border-muted-foreground/30'
                   )}
                 >
-                  {isSelected && (
-                    <div className="h-full w-full rounded-full bg-primary-foreground scale-50" />
-                  )}
+                  {isSelected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
                 </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {provider.features.map((feature) => (
-                  <span
-                    key={feature}
-                    className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                  >
-                    {feature}
-                  </span>
-                ))}
               </div>
             </button>
           );
@@ -117,27 +141,42 @@ export function TranscriptionSettings() {
 
       {/* Whisper endpoint configuration */}
       {settings.transcriptionProvider === 'whisper' && (
-        <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
-          <label className="text-sm font-medium">Whisper Server Endpoint</label>
+        <div className="space-y-4 rounded-2xl border bg-gradient-to-r from-green-500/5 to-transparent p-5 animate-scale-in">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+              <Server className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <label className="font-medium">Whisper Server Endpoint</label>
+              <p className="text-sm text-muted-foreground">Configure your local Whisper server</p>
+            </div>
+          </div>
           <input
             type="text"
             value={settings.whisperEndpoint}
             onChange={(e) => updateSettings({ whisperEndpoint: e.target.value })}
             placeholder="http://localhost:8080"
             className={cn(
-              'w-full rounded-lg border bg-background px-3 py-2 text-sm',
-              'placeholder:text-muted-foreground',
-              'focus:outline-none focus:ring-2 focus:ring-primary'
+              'w-full rounded-xl border bg-background px-4 py-3 text-sm',
+              'placeholder:text-muted-foreground/50',
+              'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary',
+              'transition-all duration-200'
             )}
           />
           <p className="text-xs text-muted-foreground">
-            Run a local Whisper server using faster-whisper-server, whisper.cpp, or LocalAI
+            Run a local Whisper server using{' '}
+            <code className="mono rounded bg-muted px-1.5 py-0.5">faster-whisper-server</code>,{' '}
+            <code className="mono rounded bg-muted px-1.5 py-0.5">whisper.cpp</code>, or LocalAI
           </p>
         </div>
       )}
 
-      <div className="flex justify-end">
-        <Button onClick={saveSettings} disabled={isSaving}>
+      <div className="flex justify-end pt-2">
+        <Button
+          onClick={saveSettings}
+          disabled={isSaving}
+          className="rounded-xl px-6"
+        >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>

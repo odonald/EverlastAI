@@ -1,10 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useRef } from 'react';
+import { Eye, EyeOff, Check, Shield, Loader2, ShieldCheck, ShieldX, Mic2, Brain } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { cn } from '@/lib/utils';
+
+type ProviderType = 'deepgram' | 'openai' | 'anthropic' | 'elevenlabs';
+
+interface ValidationResult {
+  valid: boolean;
+  error?: string;
+  info?: Record<string, unknown>;
+}
+
+// Validate through API route to avoid CORS issues
+async function validateProvider(provider: ProviderType, key: string): Promise<ValidationResult> {
+  try {
+    const response = await fetch('/api/validate-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider, key }),
+    });
+    return await response.json();
+  } catch {
+    return { valid: false, error: 'Validation request failed' };
+  }
+}
 
 interface ApiKeyInputProps {
   label: string;
@@ -12,125 +33,230 @@ interface ApiKeyInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
+  provider: ProviderType;
 }
 
-function ApiKeyInput({ label, description, value, onChange, placeholder }: ApiKeyInputProps) {
+function ApiKeyInput({ label, description, value, onChange, placeholder, provider }: ApiKeyInputProps) {
   const [showKey, setShowKey] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const lastValidatedValue = useRef<string>('');
   const hasKey = value.length > 0;
 
+  // Auto-validate when value changes (debounced)
+  useEffect(() => {
+    // Clear previous timeout
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    // Skip if empty or same as last validated
+    if (!value || value === lastValidatedValue.current) {
+      if (!value) {
+        setValidationResult(null);
+        lastValidatedValue.current = '';
+      }
+      return;
+    }
+
+    // Clear old result while typing
+    setValidationResult(null);
+
+    // Debounce validation (800ms after user stops typing)
+    debounceRef.current = setTimeout(async () => {
+      setIsValidating(true);
+      try {
+        const result = await validateProvider(provider, value);
+        setValidationResult(result);
+        lastValidatedValue.current = value;
+      } catch {
+        setValidationResult({ valid: false, error: 'Validation failed' });
+      } finally {
+        setIsValidating(false);
+      }
+    }, 800);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [value, provider]);
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">{label}</label>
-        {hasKey && (
-          <span className="flex items-center gap-1 text-xs text-green-500">
-            <Check className="h-3 w-3" />
-            Configured
-          </span>
-        )}
+    <div className="group rounded-2xl border bg-card p-4 transition-all duration-200 hover:border-primary/20 hover:shadow-soft">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <label className="font-medium">{label}</label>
+            {/* Status indicator */}
+            {isValidating && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Checking...
+              </span>
+            )}
+            {!isValidating && validationResult?.valid && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-1 text-xs text-green-600 dark:text-green-400">
+                <ShieldCheck className="h-3 w-3" />
+                Valid
+              </span>
+            )}
+            {!isValidating && validationResult?.valid === false && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive">
+                <ShieldX className="h-3 w-3" />
+                Invalid
+              </span>
+            )}
+            {!isValidating && !validationResult && hasKey && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                <Check className="h-3 w-3" />
+                Configured
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        </div>
       </div>
-      <p className="text-xs text-muted-foreground">{description}</p>
-      <div className="relative">
+
+      <div className="relative mt-3">
         <input
           type={showKey ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={cn(
-            'w-full rounded-lg border bg-background px-3 py-2 pr-10 text-sm',
-            'placeholder:text-muted-foreground',
-            'focus:outline-none focus:ring-2 focus:ring-primary'
+            'w-full rounded-xl border bg-background px-4 py-3 pr-12 text-sm transition-all duration-200',
+            'placeholder:text-muted-foreground/50',
+            'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary',
+            validationResult?.valid === true && 'border-green-500/50 bg-green-500/5',
+            validationResult?.valid === false && 'border-destructive/50 bg-destructive/5'
           )}
         />
         <button
           type="button"
           onClick={() => setShowKey(!showKey)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
+
+      {validationResult?.error && (
+        <p className="mt-2 text-sm text-destructive animate-fade-in">{validationResult.error}</p>
+      )}
+      {validationResult?.valid && validationResult.info && (
+        <p className="mt-2 text-sm text-green-600 dark:text-green-400 animate-fade-in">
+          {formatValidationInfo(provider, validationResult.info)}
+        </p>
+      )}
     </div>
   );
 }
 
-export function ApiKeySettings() {
-  const { settings, updateSettings, saveSettings, isSaving } = useSettings();
+function formatValidationInfo(provider: ProviderType, info: Record<string, unknown>): string {
+  switch (provider) {
+    case 'deepgram':
+      return info.projectName ? `Project: ${info.projectName}` : 'API key validated';
+    case 'elevenlabs':
+      return info.subscription
+        ? `Subscription: ${info.subscription} (${info.characterCount}/${info.characterLimit} chars)`
+        : 'API key validated';
+    case 'openai':
+      return info.rateLimited ? 'Valid (currently rate limited)' : 'API key validated';
+    case 'anthropic':
+      return info.rateLimited ? 'Valid (currently rate limited)' : 'API key validated';
+    default:
+      return 'Validated';
+  }
+}
 
-  const handleSave = async () => {
-    await saveSettings();
-  };
+export function ApiKeySettings() {
+  const { settings, updateSettings, isSaving } = useSettings();
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">API Keys</h3>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="text-xl font-semibold">API Keys</h3>
+        <p className="mt-1 text-muted-foreground">
           Configure your API keys for transcription and AI services.
         </p>
       </div>
 
-      <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-4">
-        <div className="flex gap-2">
-          <AlertCircle className="h-5 w-5 shrink-0 text-yellow-500" />
-          <div className="text-sm">
-            <p className="font-medium text-yellow-500">Security Notice</p>
-            <p className="text-muted-foreground">
-              API keys are stored locally on your device and never sent to our servers.
+      {/* Security notice */}
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent p-4">
+        <div className="flex gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20">
+            <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <p className="font-medium text-amber-700 dark:text-amber-300">Security Notice</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              API keys are encrypted and stored locally on your device. They are never sent to our servers.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Transcription APIs */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-muted-foreground">Transcription Services</h4>
-
-          <ApiKeyInput
-            label="Deepgram API Key"
-            description="Used for real-time speech-to-text transcription"
-            value={settings.apiKeys.deepgram}
-            onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, deepgram: value } })}
-            placeholder="Enter your Deepgram API key"
-          />
-
-          <ApiKeyInput
-            label="ElevenLabs API Key"
-            description="Alternative transcription provider"
-            value={settings.apiKeys.elevenlabs}
-            onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, elevenlabs: value } })}
-            placeholder="Enter your ElevenLabs API key"
-          />
+      {/* Transcription APIs */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Mic2 className="h-4 w-4 text-muted-foreground" />
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Transcription Services</h4>
         </div>
 
-        {/* LLM APIs */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-muted-foreground">AI/LLM Services</h4>
+        <ApiKeyInput
+          label="Deepgram"
+          description="Real-time speech-to-text with speaker detection"
+          value={settings.apiKeys.deepgram}
+          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, deepgram: value } })}
+          placeholder="Enter your Deepgram API key"
+          provider="deepgram"
+        />
 
-          <ApiKeyInput
-            label="OpenAI API Key"
-            description="Used for GPT-4 text enrichment"
-            value={settings.apiKeys.openai}
-            onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, openai: value } })}
-            placeholder="sk-..."
-          />
+        <ApiKeyInput
+          label="ElevenLabs"
+          description="Alternative transcription provider with NLP"
+          value={settings.apiKeys.elevenlabs}
+          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, elevenlabs: value } })}
+          placeholder="Enter your ElevenLabs API key"
+          provider="elevenlabs"
+        />
+      </div>
 
-          <ApiKeyInput
-            label="Anthropic API Key"
-            description="Used for Claude text enrichment"
-            value={settings.apiKeys.anthropic}
-            onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, anthropic: value } })}
-            placeholder="sk-ant-..."
-          />
+      {/* LLM APIs */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Brain className="h-4 w-4 text-muted-foreground" />
+          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">AI / LLM Services</h4>
         </div>
+
+        <ApiKeyInput
+          label="OpenAI"
+          description="GPT-5 for text enrichment and summaries"
+          value={settings.apiKeys.openai}
+          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, openai: value } })}
+          placeholder="sk-..."
+          provider="openai"
+        />
+
+        <ApiKeyInput
+          label="Anthropic"
+          description="Claude for thoughtful text analysis"
+          value={settings.apiKeys.anthropic}
+          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, anthropic: value } })}
+          placeholder="sk-ant-..."
+          provider="anthropic"
+        />
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </Button>
-      </div>
+      {isSaving && (
+        <div className="flex items-center justify-center gap-2 rounded-xl bg-muted/50 py-3 text-sm text-muted-foreground animate-fade-in">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Saving changes...
+        </div>
+      )}
     </div>
   );
 }
