@@ -35,9 +35,10 @@ Unlike simple voice recorders, EverlastAI provides:
 |--------------------------|------------|
 | Raw, unformatted transcripts | Structured, formatted output |
 | No speaker identification | Full speaker diarization with custom names |
+| Single language only | Real-time language detection and switching |
 | Manual editing required | AI enrichment with multiple modes |
 | Limited export options | PDF, DOCX, Markdown, Notion, webhooks |
-| Cloud-based (privacy concerns) | Local-first with encrypted storage |
+| Cloud-only or local-only | Flexible: cloud APIs or fully local (Whisper + Ollama) |
 
 ---
 
@@ -49,6 +50,7 @@ Unlike simple voice recorders, EverlastAI provides:
 - **Real-Time Transcription** - Watch your words appear as you speak with WebSocket streaming
 - **Speaker Diarization** - Automatically identifies and labels different speakers (S1, S2, etc.)
 - **Custom Speaker Names** - Rename speakers to actual names (e.g., "John", "Sarah") with persistent storage
+- **Real-Time Language Detection** - Automatically detects and switches between languages mid-conversation
 - **Background Recording** - Record silently without showing the app window, system tray shows recording status
 
 ### 🤖 AI-Powered Enrichments
@@ -71,10 +73,11 @@ Apply these intelligent transformations to any recording:
 
 ### 🔒 Privacy & Security
 
-- **Local-First Architecture** - All processing happens on your machine
-- **Encrypted Storage** - API keys encrypted with ChaCha20Poly1305 + Argon2
-- **Secure Key Derivation** - Per-user encryption keys derived from user email
-- **No Cloud Storage** - Your recordings stay on your device unless you export them
+- **Your Data, Your Choice** - Use cloud APIs (Deepgram, OpenAI) for best quality, or go fully local with Whisper + Ollama
+- **Encrypted Storage** - API keys and sessions encrypted with ChaCha20Poly1305 + Argon2
+- **Secure Key Derivation** - Per-user encryption keys derived from your identity
+- **No Cloud Storage** - Recordings and transcripts stay on your device unless you explicitly export them
+- **Local Processing Option** - Run completely offline with Whisper for transcription and Ollama for AI enrichment
 
 ### 🎨 Modern UI/UX
 
@@ -386,8 +389,6 @@ Special thanks to all [contributors](https://github.com/odonald/everlast/graphs/
 ---
 
 <div align="center">
-
-**Made with ❤️ by the EverlastAI team**
 
 [⬆ Back to Top](#-everlastai)
 

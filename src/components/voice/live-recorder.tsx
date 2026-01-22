@@ -533,7 +533,7 @@ export function LiveRecorder({
     setSpeakerCount(0);
   }, []);
 
-  // Start recording with a 3-second countdown
+  // Start recording with a 3-second countdown (for foreground use)
   // Initialize the session during countdown so WebSocket is ready
   const startWithCountdown = useCallback(async () => {
     setCountdown(3);
@@ -562,6 +562,17 @@ export function LiveRecorder({
     }, 1000);
   }, [initializeSession, beginRecording]);
 
+  // Start recording immediately without countdown (for background/hotkey use)
+  const startImmediately = useCallback(async () => {
+    const initialized = await initializeSession();
+    if (!initialized) {
+      setIsSessionActive(false);
+      return;
+    }
+    // Start recording right away - WebSocket will catch up
+    beginRecording();
+  }, [initializeSession, beginRecording]);
+
   // Global hotkey listener
   useEffect(() => {
     const handleHotkey = () => {
@@ -575,13 +586,19 @@ export function LiveRecorder({
         }
       } else if (!isProcessing && hasRequiredKeys) {
         setIsSessionActive(true);
-        startWithCountdown();
+        // If window is focused (app in foreground), use countdown
+        // If window is not focused (app in background), start immediately
+        if (document.hasFocus()) {
+          startWithCountdown();
+        } else {
+          startImmediately();
+        }
       }
     };
 
     window.addEventListener('toggle-recording', handleHotkey);
     return () => window.removeEventListener('toggle-recording', handleHotkey);
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, stopRecording, cancelSession]);
+  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
