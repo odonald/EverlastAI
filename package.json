@@ -2,9 +2,33 @@
   "name": "everlast-ai",
   "version": "0.1.0",
   "private": true,
-  "description": "Voice-to-Enriched-Text Desktop Application",
+  "description": "Transform your voice into AI-enriched, structured content. A privacy-focused desktop app with real-time transcription, speaker diarization, and intelligent text processing.",
   "author": "odonald",
   "license": "MIT",
+  "homepage": "https://github.com/odonald/EverlastAI#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/odonald/EverlastAI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/odonald/EverlastAI/issues"
+  },
+  "keywords": [
+    "voice-to-text",
+    "transcription",
+    "speech-recognition",
+    "ai",
+    "llm",
+    "tauri",
+    "nextjs",
+    "desktop-app",
+    "deepgram",
+    "openai",
+    "anthropic",
+    "speaker-diarization",
+    "notion",
+    "productivity"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,95 +1,115 @@
-# EverlastAI
+<div align="center">
 
-> Transform your voice into structured, AI-enriched content
+# 🎙️ EverlastAI
 
-A desktop application that captures voice input, transcribes it, and enriches it through AI-powered processing. The result is directly usable as structured notes, formatted text, or context-aware output.
+**Transform your voice into AI-enriched, structured content**
 
-## The Problem
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Built with Tauri](https://img.shields.io/badge/Built%20with-Tauri-FFC131?logo=tauri)](https://tauri.app)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-orange?logo=rust)](https://www.rust-lang.org)
 
-Converting spoken thoughts into actionable, well-formatted text is tedious. Traditional voice-to-text solutions produce raw transcriptions that require significant editing. Professionals need a faster way to capture ideas, meeting notes, and tasks without the friction of manual formatting.
+*Press a hotkey. Speak your thoughts. Get perfectly formatted, AI-enriched content.*
 
-## The Solution
+[Download](#-download) · [Features](#-features) · [Documentation](#-documentation) · [Contributing](#-contributing)
 
-EverlastAI provides a seamless voice-to-enriched-text pipeline:
+</div>
 
-1. **Hotkey Activation** - Press `Cmd/Ctrl + Shift + Space` anywhere to start recording
-2. **Voice Capture** - Speak naturally without worrying about structure
-3. **AI Transcription** - Real-time speech-to-text via Deepgram or ElevenLabs
-4. **Smart Enrichment** - AI transforms raw transcription into structured output
+---
 
-## Architecture
+## 🌟 Overview
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Tauri Shell                              │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │                    Next.js Application                       ││
-│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ ││
-│  │  │   Auth0     │  │  Settings   │  │    Main Interface   │ ││
-│  │  │   Module    │  │   (API Keys)│  │   (Voice + Output)  │ ││
-│  │  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘ ││
-│  │         │                │                     │            ││
-│  │  ┌──────┴─────────────────┴─────────────────────┴──────────┐││
-│  │  │                   Service Layer                          │││
-│  │  │  ┌──────────┐  ┌──────────────┐  ┌─────────────────┐   │││
-│  │  │  │  Voice   │  │ Transcription │  │  LLM Enrichment │   │││
-│  │  │  │ Recorder │  │   Service     │  │     Service     │   │││
-│  │  │  └────┬─────┘  └───────┬───────┘  └────────┬────────┘   │││
-│  │  └───────┼────────────────┼───────────────────┼────────────┘││
-│  └──────────┼────────────────┼───────────────────┼─────────────┘│
-│             │                │                   │               │
-│  ┌──────────┴────────────────┴───────────────────┴─────────────┐│
-│  │                    Tauri IPC Bridge                          ││
-│  │  • Global Hotkeys  • Secure Storage  • System Integration   ││
-│  └─────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-        ┌──────────┐   ┌──────────┐   ┌──────────┐
-        │  Auth0   │   │ Deepgram │   │  OpenAI  │
-        │          │   │ElevenLabs│   │  Claude  │
-        └──────────┘   └──────────┘   └──────────┘
-```
+EverlastAI is a **privacy-focused desktop application** that revolutionizes voice-to-text workflows. Capture ideas, meeting notes, and thoughts through natural speech, then watch as AI transforms them into structured, actionable content.
 
-## Tech Stack
+Unlike simple voice recorders, EverlastAI provides:
+- **Real-time transcription** with speaker identification
+- **AI-powered enrichment** (summaries, tasks, insights, translation)
+- **Beautiful, formatted output** ready for immediate use
+- **Privacy-first design** with local encrypted storage
+- **Seamless export** to PDF, DOCX, Markdown, Notion, and webhooks
 
-| Category | Technology |
-|----------|------------|
-| Framework | Next.js 14 (App Router) |
-| Desktop | Tauri 2.0 |
-| Language | TypeScript + Rust |
-| Styling | Tailwind CSS + shadcn/ui |
-| Auth | Auth0 |
-| Transcription | Deepgram, ElevenLabs |
-| LLM | OpenAI GPT-4, Anthropic Claude |
-| State | Zustand |
-| Storage | OS Keychain (via Tauri) |
+### Why EverlastAI?
 
-## Features
+| Traditional Voice-to-Text | EverlastAI |
+|--------------------------|------------|
+| Raw, unformatted transcripts | Structured, formatted output |
+| No speaker identification | Full speaker diarization with custom names |
+| Manual editing required | AI enrichment with multiple modes |
+| Limited export options | PDF, DOCX, Markdown, Notion, webhooks |
+| Cloud-based (privacy concerns) | Local-first with encrypted storage |
 
-- **Global Hotkey** - Activate from any application
-- **Multiple Transcription Providers** - Choose between Deepgram and ElevenLabs
-- **Multiple LLM Providers** - Choose between OpenAI and Claude
-- **Enrichment Modes** - Auto-detect, Notes, Summary, Action Items, Format
-- **Secure API Key Storage** - Keys stored in OS keychain, never in plain text
-- **Cross-Platform** - macOS, Windows, Linux
+---
 
-## Setup
+## ✨ Features
+
+### 🎯 Core Capabilities
+
+- **Global Hotkey Activation** - Press `Cmd/Ctrl+Shift+R` from any app to start/stop recording
+- **Real-Time Transcription** - Watch your words appear as you speak with WebSocket streaming
+- **Speaker Diarization** - Automatically identifies and labels different speakers (S1, S2, etc.)
+- **Custom Speaker Names** - Rename speakers to actual names (e.g., "John", "Sarah") with persistent storage
+- **Background Recording** - Record silently without showing the app window, system tray shows recording status
+
+### 🤖 AI-Powered Enrichments
+
+Apply these intelligent transformations to any recording:
+- **Summarize** - Generate concise summaries of conversations or notes
+- **Extract Tasks** - Automatically pull out action items and to-dos
+- **Key Insights** - Identify best practices, learnings, and important points
+- **Translate** - Translate content to 15+ languages
+- **Clean Format** - Polish transcripts for readability and structure
+
+### 📤 Flexible Export Options
+
+- **PDF** - Beautiful formatted documents with speaker labels and timestamps
+- **DOCX** - Microsoft Word format with full formatting
+- **Markdown** - Clean text format for documentation
+- **Email** - One-click sharing via mailto
+- **Webhooks** - Integrate with Zapier, n8n, Make, or custom endpoints
+- **Notion** - Direct export to your Notion workspace via OAuth
+
+### 🔒 Privacy & Security
+
+- **Local-First Architecture** - All processing happens on your machine
+- **Encrypted Storage** - API keys encrypted with ChaCha20Poly1305 + Argon2
+- **Secure Key Derivation** - Per-user encryption keys derived from user email
+- **No Cloud Storage** - Your recordings stay on your device unless you export them
+
+### 🎨 Modern UI/UX
+
+- **Beautiful Dashboard** - Clean, intuitive interface built with shadcn/ui
+- **Dark Mode** - Full support with system preference detection
+- **Session Management** - Organized by date with search and filtering
+- **Real-Time Preview** - See transcription as it happens
+- **Responsive Design** - Optimized for desktop workflows
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- pnpm 9+
-- Rust 1.70+
-- Tauri CLI 2.0
+Before installing, ensure you have:
+- **Node.js** 18.0 or higher ([Download](https://nodejs.org/))
+- **pnpm** 9.0 or higher ([Install](https://pnpm.io/installation))
+- **Rust** 1.70 or higher ([Install](https://rustup.rs/))
+- **API Keys** for at least one transcription and one LLM provider:
+  - Transcription: [Deepgram](https://deepgram.com) or [ElevenLabs](https://elevenlabs.io)
+  - LLM: [OpenAI](https://platform.openai.com) or [Anthropic](https://console.anthropic.com)
 
 ### Installation
 
+#### Option 1: Download Pre-built Binaries (Recommended)
+
+Coming soon! Pre-built binaries for macOS, Windows, and Linux will be available in the [Releases](https://github.com/odonald/everlast/releases) section.
+
+#### Option 2: Build from Source
+
 ```bash
 # Clone the repository
-git clone https://github.com/odonald/EverlastAI.git
-cd EverlastAI
+git clone https://github.com/odonald/everlast.git
+cd everlast
 
 # Install dependencies
 pnpm install
@@ -98,78 +118,277 @@ pnpm install
 pnpm tauri dev
 ```
 
-### Building
+### First Launch Setup
 
-```bash
-# Build for production
-pnpm tauri build
-```
+1. **Sign In** - Authenticate with Auth0 (required for per-user encryption)
+2. **Add API Keys** - Go to Settings → API Keys and add your credentials:
+   - **Transcription**: Deepgram or ElevenLabs API key
+   - **LLM**: OpenAI or Anthropic API key
+3. **Configure Settings** - Choose your preferred providers and enrichment modes
+4. **Test Recording** - Click "New Session" or use the global hotkey `Cmd/Ctrl+Shift+R`
 
 ### Configuration
 
-1. Launch the application
-2. Sign in with Auth0
-3. Go to Settings → API Keys
-4. Add your API keys:
-   - **Deepgram** or **ElevenLabs** for transcription
-   - **OpenAI** or **Anthropic** for LLM enrichment
+#### Environment Variables
 
-## Design Decisions
-
-### Why Tauri over Electron?
-
-- **Smaller bundle size** (~10MB vs ~150MB)
-- **Better performance** (native Rust backend)
-- **Improved security** (no Node.js in main process)
-- **Native OS integration** (keychain, notifications)
-
-### Why separate transcription and LLM services?
-
-Allows users to mix providers based on their needs and existing API keys. Some users prefer Deepgram for speed, others prefer ElevenLabs for accuracy. Same flexibility for LLM choice.
-
-### Why store API keys in OS keychain?
-
-Security best practice. API keys are sensitive credentials that shouldn't be stored in plain text files or browser storage. The OS keychain provides encrypted storage with user authentication.
-
-### Why Auth0?
-
-- Handles security complexities (PKCE, token refresh)
-- Works well with desktop apps via custom URI schemes
-- User data isolation for future cloud features
-
-## Project Structure
-
-```
-everlast/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   ├── components/             # React components
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Service adapters and utilities
-│   └── types/                  # TypeScript types
-├── src-tauri/
-│   ├── src/                    # Rust backend
-│   └── tauri.conf.json         # Tauri configuration
-├── .github/workflows/          # CI/CD pipelines
-└── claude.md                   # AI development context
-```
-
-## Commands
+Create a `.env` file in the project root (copy from `.env.example`):
 
 ```bash
-pnpm dev          # Start Next.js dev server
-pnpm tauri dev    # Start Tauri dev mode
-pnpm build        # Build Next.js
-pnpm tauri build  # Build desktop app
-pnpm test         # Run tests
-pnpm lint         # Run ESLint
-pnpm typecheck    # Run TypeScript check
+# Auth0 Configuration (Required)
+NEXT_PUBLIC_AUTH0_DOMAIN=your-domain.auth0.com
+NEXT_PUBLIC_AUTH0_CLIENT_ID=your-client-id
+AUTH0_CLIENT_SECRET=your-client-secret
+
+# Application URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Notion Integration (Optional)
+NOTION_CLIENT_ID=your-notion-client-id
+NOTION_CLIENT_SECRET=your-notion-client-secret
+NOTION_REDIRECT_URI=http://localhost:3000/api/notion/callback
+NEXT_PUBLIC_NOTION_ENABLED=true
 ```
 
-## License
+**Important:** Never commit your `.env` file! API keys for Deepgram, ElevenLabs, OpenAI, and Anthropic are stored securely in the OS keychain via the Settings UI, not in environment variables.
 
-MIT
+#### macOS Permissions
+
+EverlastAI requires **Accessibility permissions** for global hotkeys:
+1. Go to System Preferences → Privacy & Security → Accessibility
+2. Add EverlastAI to the allowed apps list
+3. Restart the application
 
 ---
 
-Built with Tauri, Next.js, and AI-powered enrichment.
+## 📖 Documentation
+
+### Architecture
+
+EverlastAI uses a hybrid architecture combining Next.js and Tauri:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Tauri Native Shell                       │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │              Next.js 14 (Static Export)              │   │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │   │
+│  │  │   Auth   │  │ Settings │  │    Dashboard     │  │   │
+│  │  │ (Auth0)  │  │ (API Keys)│  │ (Recording/Sess.)│  │   │
+│  │  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │   │
+│  │       └─────────────┴─────────────────┘            │   │
+│  │  ┌──────────────────────────────────────────────┐  │   │
+│  │  │           Service Layer                       │  │   │
+│  │  │  Transcription  LLM  Export  Session Storage │  │   │
+│  │  └────────────────┬─────────────────────────────┘  │   │
+│  └───────────────────┼────────────────────────────────┘   │
+│  ┌───────────────────┴────────────────────────────────┐   │
+│  │              Tauri IPC Bridge (Rust)               │   │
+│  │  • Global Hotkeys  • Encrypted Storage             │   │
+│  │  • System Tray     • Session Persistence           │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+           │                    │                    │
+    ┌──────▼────────┐  ┌────────▼────────┐  ┌───────▼────────┐
+    │   Deepgram    │  │  OpenAI/Claude  │  │   Notion API   │
+    │  ElevenLabs   │  │     Ollama      │  │   Webhooks     │
+    └───────────────┘  └─────────────────┘  └────────────────┘
+```
+
+#### Why This Stack?
+
+- **Tauri** - 10MB bundles vs. 150MB with Electron, native performance, better security
+- **Next.js** - Modern React framework with static export for embedded web views
+- **Rust** - Secure, fast backend for OS integration and encryption
+- **TypeScript** - Type safety across the entire frontend
+- **Zustand** - Lightweight state management without Redux boilerplate
+
+### Project Structure
+
+```
+everlast/
+├── src/                          # Frontend (Next.js)
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx              # Main dashboard
+│   │   ├── landing/              # Marketing page
+│   │   └── api/                  # API routes (transcription, LLM, auth)
+│   ├── components/               # React components
+│   │   ├── voice/                # Recording UI (LiveRecorder)
+│   │   ├── sessions/             # Session management UI
+│   │   ├── settings/             # Settings panels
+│   │   └── ui/                   # shadcn/ui components
+│   ├── hooks/                    # Custom React hooks
+│   │   └── use-settings.ts       # Zustand store for settings
+│   ├── lib/                      # Core business logic
+│   │   ├── transcription/        # Transcription adapters
+│   │   ├── llm/                  # LLM adapters
+│   │   ├── export.ts             # Export functions
+│   │   └── sessions.ts           # Session storage interface
+│   └── contexts/                 # React contexts
+│       └── auth-context.tsx      # Auth0 integration
+├── src-tauri/                    # Backend (Rust)
+│   ├── src/
+│   │   ├── lib.rs                # Tauri setup (hotkeys, tray, deep-link)
+│   │   ├── commands.rs           # IPC commands (storage, sessions)
+│   │   ├── storage.rs            # Encrypted storage layer
+│   │   └── sessions.rs           # Session persistence
+│   ├── tauri.conf.json           # Tauri configuration
+│   └── Cargo.toml                # Rust dependencies
+├── .github/                      # GitHub configuration
+│   ├── workflows/                # CI/CD pipelines
+│   ├── ISSUE_TEMPLATE/           # Issue templates
+│   └── PULL_REQUEST_TEMPLATE.md  # PR template
+├── CONTRIBUTING.md               # Contribution guidelines
+├── CODE_OF_CONDUCT.md            # Community standards
+├── SECURITY.md                   # Security policy
+└── CLAUDE.md                     # AI development context
+```
+
+### Key Commands
+
+```bash
+# Development
+pnpm tauri dev           # Full app (Next.js + Tauri together) - primary dev command
+pnpm dev                 # Next.js only on localhost:3000
+
+# Building
+pnpm tauri build         # Production desktop app bundle
+pnpm build               # Next.js static export to out/
+
+# Testing & Quality
+pnpm test                # Vitest unit tests
+pnpm test -- path/to/test.ts  # Run single test file
+pnpm test:coverage       # Tests with coverage
+pnpm test:e2e            # Playwright E2E tests
+pnpm lint                # ESLint
+pnpm typecheck           # TypeScript strict check
+pnpm format              # Prettier formatting
+
+# Rust backend only
+cd src-tauri && cargo build   # Build Rust code
+cd src-tauri && cargo check   # Fast type check
+```
+
+---
+
+## 🛠️ Development
+
+### Adding a New Transcription Provider
+
+1. Create `src/lib/transcription/newprovider.ts`:
+```typescript
+export async function transcribeWithNewProvider(
+  audioBlob: Blob,
+  apiKey: string
+): Promise<string> {
+  // Implementation
+}
+```
+
+2. Add case to `src/lib/transcription/index.ts`
+3. Update `transcriptionProvider` type in `src/hooks/use-settings.ts`
+4. Add UI option in `src/components/settings/transcription-settings.tsx`
+
+### Adding a New LLM Provider
+
+1. Create `src/lib/llm/newprovider.ts`
+2. Add case to `src/lib/llm/index.ts`
+3. Update `llmProvider` type in settings
+4. Add UI option in `src/components/settings/llm-settings.tsx`
+
+### Running Tests
+
+```bash
+# Unit tests
+pnpm test
+
+# Watch mode
+pnpm test -- --watch
+
+# E2E tests
+pnpm test:e2e
+
+# Coverage
+pnpm test:coverage
+```
+
+---
+
+## 📥 Download
+
+### Pre-built Binaries
+
+| Platform | Download | Requirements |
+|----------|----------|--------------|
+| macOS (Apple Silicon) | Coming soon | macOS 11.0+ |
+| macOS (Intel) | Coming soon | macOS 10.15+ |
+| Windows | Coming soon | Windows 10+ |
+| Linux | Coming soon | Ubuntu 20.04+ / Fedora 36+ |
+
+### Building from Source
+
+See [Installation](#installation) above.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+### Ways to Contribute
+
+- 🐛 Report bugs and issues
+- 💡 Suggest new features or improvements
+- 📝 Improve documentation
+- 🧪 Write tests
+- 🔧 Submit pull requests
+- 🌍 Translate the app to new languages
+- ⭐ Star the repository to show support
+
+### Development Setup
+
+1. Fork the repository
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/everlast.git`
+3. Create a branch: `git checkout -b feature/your-feature-name`
+4. Make your changes and test thoroughly
+5. Run tests: `pnpm test && pnpm lint && pnpm typecheck`
+6. Commit with a clear message: `git commit -m "Add: brief description"`
+7. Push to your fork: `git push origin feature/your-feature-name`
+8. Open a Pull Request with a detailed description
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+Built with these amazing technologies:
+- [Tauri](https://tauri.app) - Desktop framework
+- [Next.js](https://nextjs.org) - React framework
+- [Deepgram](https://deepgram.com) - Speech-to-text API
+- [OpenAI](https://openai.com) & [Anthropic](https://anthropic.com) - LLM providers
+- [shadcn/ui](https://ui.shadcn.com) - UI components
+- [Auth0](https://auth0.com) - Authentication
+
+Special thanks to all [contributors](https://github.com/odonald/everlast/graphs/contributors) who help make EverlastAI better!
+
+---
+
+## 📞 Support & Community
+
+- **Issues**: [GitHub Issues](https://github.com/odonald/everlast/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/odonald/everlast/discussions)
+- **Security**: See [SECURITY.md](SECURITY.md) for reporting vulnerabilities
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the EverlastAI team**
+
+[⬆ Back to Top](#-everlastai)
+
+</div>
