@@ -573,13 +573,12 @@ export function LiveRecorder({
     beginRecording();
   }, [initializeSession, beginRecording]);
 
-  // Ref to hold the latest handler function (avoids stale closures in event listeners)
-  const hotkeyHandlerRef = useRef<() => void>(() => {});
-
-  // Update the handler ref whenever dependencies change
+  // Global hotkey listener
   useEffect(() => {
-    hotkeyHandlerRef.current = () => {
-      console.log('[Hotkey] Event received', { isRecording, countdown, isProcessing, hasRequiredKeys, hasFocus: document.hasFocus() });
+    const handleHotkey = () => {
+      // Check if this was triggered from background (set by Rust)
+      const isBackground = (window as unknown as { __hotkeyBackground?: boolean }).__hotkeyBackground ?? false;
+      console.log('[Hotkey] Event received', { isRecording, countdown, isProcessing, hasRequiredKeys, isBackground });
 
       if (isRecording || countdown !== null) {
         // If recording or counting down, stop/cancel
@@ -593,62 +592,22 @@ export function LiveRecorder({
       } else if (!isProcessing && hasRequiredKeys) {
         console.log('[Hotkey] Starting new recording');
         setIsSessionActive(true);
-        // If window is focused (app in foreground), use countdown
-        // If window is not focused (app in background), start immediately
-        if (document.hasFocus()) {
-          console.log('[Hotkey] Window focused - using countdown');
-          startWithCountdown();
-        } else {
-          console.log('[Hotkey] Window not focused - starting immediately');
+        // If triggered from background, start immediately without countdown
+        if (isBackground) {
+          console.log('[Hotkey] Background mode - starting immediately');
           startImmediately();
+        } else {
+          console.log('[Hotkey] Foreground mode - using countdown');
+          startWithCountdown();
         }
       } else {
         console.log('[Hotkey] Cannot start - processing:', isProcessing, 'hasKeys:', hasRequiredKeys);
       }
     };
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
 
-  // Set up event listeners once on mount
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    let mounted = true;
-
-    // Wrapper that calls the current handler ref
-    const handleHotkey = () => {
-      hotkeyHandlerRef.current();
-    };
-
-    // Set up Tauri event listener (works in background)
-    const setupTauriListener = async () => {
-      if (typeof window !== 'undefined' && window.__TAURI__) {
-        try {
-          const { listen } = await import('@tauri-apps/api/event');
-          if (mounted) {
-            unlisten = await listen('toggle-recording', () => {
-              console.log('[Tauri] toggle-recording event received');
-              handleHotkey();
-            });
-            console.log('[Tauri] Event listener registered successfully');
-          }
-        } catch (e) {
-          console.error('[Tauri] Failed to set up event listener:', e);
-        }
-      }
-    };
-
-    setupTauriListener();
-
-    // Also listen for DOM events as fallback (for non-Tauri environments)
     window.addEventListener('toggle-recording', handleHotkey);
-
-    return () => {
-      mounted = false;
-      if (unlisten) {
-        unlisten();
-      }
-      window.removeEventListener('toggle-recording', handleHotkey);
-    };
-  }, []); // Empty deps - only run once on mount
+    return () => window.removeEventListener('toggle-recording', handleHotkey);
+  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -4,7 +4,7 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    Emitter, Listener, Manager, WindowEvent,
+    Listener, Manager, WindowEvent,
 };
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
@@ -42,12 +42,44 @@ pub fn run() {
                 // Register the callback
                 if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, event| {
                     if event.state == ShortcutState::Pressed {
-                        println!("Global hotkey pressed! Emitting toggle-recording event...");
-                        // Emit app-level event - works even when window is hidden/unfocused
-                        // This allows true background recording from any app
-                        match hotkey_handle.emit("toggle-recording", ()) {
-                            Ok(_) => println!("Event emitted successfully"),
-                            Err(e) => eprintln!("Failed to emit event: {}", e),
+                        println!("Global hotkey pressed!");
+
+                        if let Some(window) = hotkey_handle.get_webview_window("main") {
+                            // Check if window is hidden - if so, we need to wake up the JS context
+                            // macOS suspends JS execution in hidden webviews
+                            let was_hidden = !window.is_visible().unwrap_or(true);
+
+                            if was_hidden {
+                                println!("Window was hidden, waking up JS context...");
+                                // Briefly show window to wake up JS engine (it processes immediately)
+                                let _ = window.show();
+                            }
+
+                            // Use eval to directly trigger JS - more reliable than events for hidden windows
+                            let js_code = if was_hidden {
+                                // Background mode: start immediately, then hide window again
+                                "window.__hotkeyTriggered = true; window.__hotkeyBackground = true; window.dispatchEvent(new Event('toggle-recording'));"
+                            } else {
+                                // Foreground mode: normal behavior
+                                "window.__hotkeyTriggered = true; window.__hotkeyBackground = false; window.dispatchEvent(new Event('toggle-recording'));"
+                            };
+
+                            match window.eval(js_code) {
+                                Ok(_) => println!("JS executed successfully (background: {})", was_hidden),
+                                Err(e) => eprintln!("Failed to execute JS: {}", e),
+                            }
+
+                            // If window was hidden and we showed it, hide it again after a tiny delay
+                            // The JS will handle keeping it hidden during recording
+                            if was_hidden {
+                                let window_clone = window.clone();
+                                std::thread::spawn(move || {
+                                    // Small delay to let JS execute
+                                    std::thread::sleep(std::time::Duration::from_millis(100));
+                                    let _ = window_clone.hide();
+                                    println!("Window hidden again");
+                                });
+                            }
                         }
                     }
                 }) {
