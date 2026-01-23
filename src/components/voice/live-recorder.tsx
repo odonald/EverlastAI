@@ -19,43 +19,6 @@ async function setTrayRecordingState(recording: boolean) {
   }
 }
 
-// Show and focus the Tauri window (for background recording completion)
-async function showAndFocusWindow() {
-  if (typeof window === 'undefined' || !window.__TAURI__) return;
-  try {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const win = getCurrentWindow();
-    await win.show();
-    await win.setFocus();
-  } catch (e) {
-    console.error('Failed to show window:', e);
-  }
-}
-
-// Send app to background by hiding it (for background recording)
-// Uses macOS hide instead of close - app stays running but disappears
-async function sendToBackground() {
-  if (typeof window === 'undefined' || !window.__TAURI__) return;
-  try {
-    // Use AppleScript to hide our app - this returns focus to previous app
-    const { Command } = await import('@tauri-apps/plugin-shell');
-    const cmd = Command.create('osascript', [
-      '-e', 'tell application "System Events" to set visible of process "EverlastAI" to false'
-    ]);
-    await cmd.execute();
-    console.log('[Window] App hidden via AppleScript');
-  } catch (e) {
-    console.error('Failed to hide app:', e);
-    // Fallback: just hide the window
-    try {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window');
-      const win = getCurrentWindow();
-      await win.hide();
-    } catch (e2) {
-      console.error('Fallback hide also failed:', e2);
-    }
-  }
-}
 
 interface LiveUtterance {
   id: string;
@@ -155,17 +118,14 @@ export function LiveRecorder({
 
   // Initialize session (called during countdown) - sets up mic, WebSocket, but doesn't start recording
   const initializeSession = useCallback(async (): Promise<boolean> => {
-    console.log('[initializeSession] Starting...');
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        console.error('[initializeSession] getUserMedia not available');
         alert('Microphone access is not available.');
         return false;
       }
 
       isStoppingRef.current = false;
 
-      console.log('[initializeSession] Requesting microphone access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -174,7 +134,6 @@ export function LiveRecorder({
           noiseSuppression: true,
         }
       });
-      console.log('[initializeSession] Microphone access granted');
       streamRef.current = stream;
 
       // Reset state
@@ -483,10 +442,9 @@ export function LiveRecorder({
     const allText = chronologicalUtterances.map(u => u.text).join(' ');
     const wordCount = allText.split(/\s+/).filter(w => w).length;
 
-    // If no words were detected, skip saving and just show window
+    // If no words were detected, skip saving
     if (wordCount === 0) {
       console.log('[Recording] Empty recording detected, discarding without saving');
-      showAndFocusWindow();
       return;
     }
 
@@ -537,9 +495,6 @@ export function LiveRecorder({
         model: 'nova-3',
       },
     };
-
-    // Show the window when recording completes (for background recording)
-    showAndFocusWindow();
 
     onRecordingComplete(result);
   }, [utterances, detectedLanguages, settings.transcriptionProvider, onRecordingComplete]);
@@ -598,83 +553,26 @@ export function LiveRecorder({
     }, 1000);
   }, [initializeSession, beginRecording]);
 
-  // Start recording immediately without countdown (for background/hotkey use)
-  const startImmediately = useCallback(async (hideAfterStart: boolean = false) => {
-    console.log('[startImmediately] Starting, hideAfterStart:', hideAfterStart);
-
-    const initialized = await initializeSession();
-    console.log('[startImmediately] Session initialized:', initialized);
-
-    if (!initialized) {
-      setIsSessionActive(false);
-      return;
-    }
-
-    // Start recording right away
-    beginRecording();
-    console.log('[startImmediately] Recording started');
-
-    // If this was triggered from background, send app to background
-    // This hides the app and returns focus to previous app (e.g., Chrome)
-    if (hideAfterStart) {
-      // Small delay to ensure recording has started
-      setTimeout(() => {
-        console.log('[startImmediately] Sending app to background');
-        sendToBackground();
-      }, 50);
-    }
-  }, [initializeSession, beginRecording]);
-
-  // Store current state in refs so global function always has access to latest values
-  const stateRef = useRef({ isRecording, countdown, isProcessing, hasRequiredKeys });
+  // Global hotkey listener - always brings app to front and uses countdown
   useEffect(() => {
-    stateRef.current = { isRecording, countdown, isProcessing, hasRequiredKeys };
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys]);
-
-  // Store callbacks in refs
-  const callbacksRef = useRef({ startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive });
-  useEffect(() => {
-    callbacksRef.current = { startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive };
-  }, [startWithCountdown, startImmediately, stopRecording, cancelSession]);
-
-  // Register global function that Rust can call directly
-  useEffect(() => {
-    // Define global function for Rust to call
-    (window as unknown as { __handleHotkey: (isBackground: boolean) => void }).__handleHotkey = (isBackground: boolean) => {
-      const { isRecording, countdown, isProcessing, hasRequiredKeys } = stateRef.current;
-      const { startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive } = callbacksRef.current;
-
-      console.log('[__handleHotkey] Called directly from Rust', { isRecording, countdown, isProcessing, hasRequiredKeys, isBackground });
-
+    const handleHotkey = () => {
       if (isRecording || countdown !== null) {
+        // If recording or counting down, stop/cancel
         if (countdown !== null) {
-          console.log('[__handleHotkey] Canceling countdown');
           cancelSession();
         } else {
-          console.log('[__handleHotkey] Stopping recording');
           stopRecording();
         }
       } else if (!isProcessing && hasRequiredKeys) {
-        console.log('[__handleHotkey] Starting new recording');
+        // Start new recording with countdown
         setIsSessionActive(true);
-        if (isBackground) {
-          console.log('[__handleHotkey] Background mode - starting immediately');
-          startImmediately(true);
-        } else {
-          console.log('[__handleHotkey] Foreground mode - using countdown');
-          startWithCountdown();
-        }
-      } else {
-        console.log('[__handleHotkey] Cannot start - processing:', isProcessing, 'hasKeys:', hasRequiredKeys);
+        startWithCountdown();
       }
     };
 
-    console.log('[LiveRecorder] Global __handleHotkey function registered');
-
-    return () => {
-      delete (window as unknown as { __handleHotkey?: unknown }).__handleHotkey;
-    };
-  }, []);
+    window.addEventListener('toggle-recording', handleHotkey);
+    return () => window.removeEventListener('toggle-recording', handleHotkey);
+  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, stopRecording, cancelSession]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -45,35 +45,16 @@ pub fn run() {
                         println!("Global hotkey pressed!");
 
                         if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            let was_focused = window.is_focused().unwrap_or(false);
-                            println!("Window state - focused: {}", was_focused);
+                            // Always bring app to front and focus
+                            println!("Hotkey: bringing app to front...");
+                            let _ = window.show();
+                            let _ = window.set_focus();
 
-                            // Determine if this is a background trigger (window wasn't focused)
-                            let is_background = !was_focused;
-
-                            // CRITICAL: macOS throttles JS execution in unfocused webviews
-                            // We MUST focus the window for JS to execute immediately
-                            if !was_focused {
-                                println!("Background mode: focusing window for JS execution...");
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
-
-                            // Call the global hotkey handler function directly
-                            // JS will handle returning to previous app if in background mode
-                            let js_code = format!(
-                                "console.log('[Rust->JS] Calling __handleHotkey({})'); \
-                                 if (typeof window.__handleHotkey === 'function') {{ \
-                                     window.__handleHotkey({}); \
-                                 }} else {{ \
-                                     console.error('__handleHotkey not registered yet'); \
-                                 }}",
-                                is_background, is_background
-                            );
-
-                            match window.eval(&js_code) {
-                                Ok(_) => println!("JS function called (background: {})", is_background),
-                                Err(e) => eprintln!("Failed to execute JS: {}", e),
+                            // Trigger recording toggle
+                            let js_code = "window.dispatchEvent(new Event('toggle-recording'));";
+                            match window.eval(js_code) {
+                                Ok(_) => println!("Recording toggle triggered"),
+                                Err(e) => eprintln!("Failed to trigger recording: {}", e),
                             }
                         }
                     }
