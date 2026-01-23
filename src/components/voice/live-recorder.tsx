@@ -32,6 +32,19 @@ async function showAndFocusWindow() {
   }
 }
 
+// Hide the Tauri window (for background recording)
+async function hideWindow() {
+  if (typeof window === 'undefined' || !window.__TAURI__) return;
+  try {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    const win = getCurrentWindow();
+    await win.hide();
+    console.log('[Window] Hidden for background recording');
+  } catch (e) {
+    console.error('Failed to hide window:', e);
+  }
+}
+
 interface LiveUtterance {
   id: string;
   speaker: number;
@@ -447,15 +460,22 @@ export function LiveRecorder({
     setIsSessionActive(false);
     setTrayRecordingState(false);
 
-    // Build final result
-    const duration = (Date.now() - startTimeRef.current) / 1000;
-
     // Sort utterances chronologically (oldest first) for the final result
     // During recording, they were prepended (newest first) for live view
     const chronologicalUtterances = [...utterances].sort((a, b) => a.start - b.start);
 
     const allText = chronologicalUtterances.map(u => u.text).join(' ');
     const wordCount = allText.split(/\s+/).filter(w => w).length;
+
+    // If no words were detected, skip saving and just show window
+    if (wordCount === 0) {
+      console.log('[Recording] Empty recording detected, discarding without saving');
+      showAndFocusWindow();
+      return;
+    }
+
+    // Build final result
+    const duration = (Date.now() - startTimeRef.current) / 1000;
 
     const speakerSet = new Set(chronologicalUtterances.map(u => u.speaker));
     const speakers: SpeakerInfo[] = Array.from(speakerSet).map(id => ({
@@ -563,14 +583,21 @@ export function LiveRecorder({
   }, [initializeSession, beginRecording]);
 
   // Start recording immediately without countdown (for background/hotkey use)
-  const startImmediately = useCallback(async () => {
+  const startImmediately = useCallback(async (hideAfterStart: boolean = false) => {
+    console.log('[startImmediately] Starting, hideAfterStart:', hideAfterStart);
     const initialized = await initializeSession();
     if (!initialized) {
       setIsSessionActive(false);
       return;
     }
-    // Start recording right away - WebSocket will catch up
+    // Start recording right away
     beginRecording();
+
+    // If this was triggered from background, hide the window now that recording has started
+    if (hideAfterStart) {
+      console.log('[startImmediately] Hiding window for background recording');
+      hideWindow();
+    }
   }, [initializeSession, beginRecording]);
 
   // Global hotkey listener
@@ -592,10 +619,10 @@ export function LiveRecorder({
       } else if (!isProcessing && hasRequiredKeys) {
         console.log('[Hotkey] Starting new recording');
         setIsSessionActive(true);
-        // If triggered from background, start immediately without countdown
+        // If triggered from background, start immediately without countdown and hide window
         if (isBackground) {
-          console.log('[Hotkey] Background mode - starting immediately');
-          startImmediately();
+          console.log('[Hotkey] Background mode - starting immediately and hiding window');
+          startImmediately(true); // true = hide window after recording starts
         } else {
           console.log('[Hotkey] Foreground mode - using countdown');
           startWithCountdown();

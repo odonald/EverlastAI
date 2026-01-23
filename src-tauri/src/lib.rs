@@ -50,35 +50,23 @@ pub fn run() {
                             let was_hidden = !window.is_visible().unwrap_or(true);
 
                             if was_hidden {
-                                println!("Window was hidden, waking up JS context...");
-                                // Briefly show window to wake up JS engine (it processes immediately)
+                                println!("Window was hidden, showing to wake up JS...");
+                                // Show window to wake up JS engine - JS will hide it after recording starts
                                 let _ = window.show();
                             }
 
-                            // Use eval to directly trigger JS - more reliable than events for hidden windows
-                            let js_code = if was_hidden {
-                                // Background mode: start immediately, then hide window again
-                                "window.__hotkeyTriggered = true; window.__hotkeyBackground = true; window.dispatchEvent(new Event('toggle-recording'));"
-                            } else {
-                                // Foreground mode: normal behavior
-                                "window.__hotkeyTriggered = true; window.__hotkeyBackground = false; window.dispatchEvent(new Event('toggle-recording'));"
-                            };
+                            // Use eval to directly call the recording function
+                            // Pass background flag so JS knows to start immediately and hide window
+                            let js_code = format!(
+                                "console.log('[Rust] Hotkey JS executing, background: {}'); \
+                                 window.__hotkeyBackground = {}; \
+                                 window.dispatchEvent(new Event('toggle-recording'));",
+                                was_hidden, was_hidden
+                            );
 
-                            match window.eval(js_code) {
-                                Ok(_) => println!("JS executed successfully (background: {})", was_hidden),
+                            match window.eval(&js_code) {
+                                Ok(_) => println!("JS eval called (background: {})", was_hidden),
                                 Err(e) => eprintln!("Failed to execute JS: {}", e),
-                            }
-
-                            // If window was hidden and we showed it, hide it again after a tiny delay
-                            // The JS will handle keeping it hidden during recording
-                            if was_hidden {
-                                let window_clone = window.clone();
-                                std::thread::spawn(move || {
-                                    // Small delay to let JS execute
-                                    std::thread::sleep(std::time::Duration::from_millis(100));
-                                    let _ = window_clone.hide();
-                                    println!("Window hidden again");
-                                });
                             }
                         }
                     }
