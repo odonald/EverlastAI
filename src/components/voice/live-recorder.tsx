@@ -143,14 +143,17 @@ export function LiveRecorder({
 
   // Initialize session (called during countdown) - sets up mic, WebSocket, but doesn't start recording
   const initializeSession = useCallback(async (): Promise<boolean> => {
+    console.log('[initializeSession] Starting...');
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('[initializeSession] getUserMedia not available');
         alert('Microphone access is not available.');
         return false;
       }
 
       isStoppingRef.current = false;
 
+      console.log('[initializeSession] Requesting microphone access...');
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           channelCount: 1,
@@ -159,6 +162,7 @@ export function LiveRecorder({
           noiseSuppression: true,
         }
       });
+      console.log('[initializeSession] Microphone access granted');
       streamRef.current = stream;
 
       // Reset state
@@ -585,56 +589,80 @@ export function LiveRecorder({
   // Start recording immediately without countdown (for background/hotkey use)
   const startImmediately = useCallback(async (hideAfterStart: boolean = false) => {
     console.log('[startImmediately] Starting, hideAfterStart:', hideAfterStart);
+
     const initialized = await initializeSession();
+    console.log('[startImmediately] Session initialized:', initialized);
+
     if (!initialized) {
       setIsSessionActive(false);
       return;
     }
+
     // Start recording right away
     beginRecording();
+    console.log('[startImmediately] Recording started');
 
-    // If this was triggered from background, hide the window now that recording has started
+    // If this was triggered from background, hide the window after a delay
+    // The delay ensures getUserMedia and WebSocket have fully initialized
     if (hideAfterStart) {
-      console.log('[startImmediately] Hiding window for background recording');
-      hideWindow();
+      // Wait a moment for everything to stabilize, then hide
+      setTimeout(() => {
+        console.log('[startImmediately] Hiding window for background recording');
+        hideWindow();
+      }, 300);
     }
   }, [initializeSession, beginRecording]);
 
-  // Global hotkey listener
+  // Store current state in refs so global function always has access to latest values
+  const stateRef = useRef({ isRecording, countdown, isProcessing, hasRequiredKeys });
   useEffect(() => {
-    const handleHotkey = () => {
-      // Check if this was triggered from background (set by Rust)
-      const isBackground = (window as unknown as { __hotkeyBackground?: boolean }).__hotkeyBackground ?? false;
-      console.log('[Hotkey] Event received', { isRecording, countdown, isProcessing, hasRequiredKeys, isBackground });
+    stateRef.current = { isRecording, countdown, isProcessing, hasRequiredKeys };
+  }, [isRecording, countdown, isProcessing, hasRequiredKeys]);
+
+  // Store callbacks in refs
+  const callbacksRef = useRef({ startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive });
+  useEffect(() => {
+    callbacksRef.current = { startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive };
+  }, [startWithCountdown, startImmediately, stopRecording, cancelSession]);
+
+  // Register global function that Rust can call directly
+  useEffect(() => {
+    // Define global function for Rust to call
+    (window as unknown as { __handleHotkey: (isBackground: boolean) => void }).__handleHotkey = (isBackground: boolean) => {
+      const { isRecording, countdown, isProcessing, hasRequiredKeys } = stateRef.current;
+      const { startWithCountdown, startImmediately, stopRecording, cancelSession, setIsSessionActive } = callbacksRef.current;
+
+      console.log('[__handleHotkey] Called directly from Rust', { isRecording, countdown, isProcessing, hasRequiredKeys, isBackground });
 
       if (isRecording || countdown !== null) {
-        // If recording or counting down, stop/cancel
         if (countdown !== null) {
-          console.log('[Hotkey] Canceling countdown');
+          console.log('[__handleHotkey] Canceling countdown');
           cancelSession();
         } else {
-          console.log('[Hotkey] Stopping recording');
+          console.log('[__handleHotkey] Stopping recording');
           stopRecording();
         }
       } else if (!isProcessing && hasRequiredKeys) {
-        console.log('[Hotkey] Starting new recording');
+        console.log('[__handleHotkey] Starting new recording');
         setIsSessionActive(true);
-        // If triggered from background, start immediately without countdown and hide window
         if (isBackground) {
-          console.log('[Hotkey] Background mode - starting immediately and hiding window');
-          startImmediately(true); // true = hide window after recording starts
+          console.log('[__handleHotkey] Background mode - starting immediately');
+          startImmediately(true);
         } else {
-          console.log('[Hotkey] Foreground mode - using countdown');
+          console.log('[__handleHotkey] Foreground mode - using countdown');
           startWithCountdown();
         }
       } else {
-        console.log('[Hotkey] Cannot start - processing:', isProcessing, 'hasKeys:', hasRequiredKeys);
+        console.log('[__handleHotkey] Cannot start - processing:', isProcessing, 'hasKeys:', hasRequiredKeys);
       }
     };
 
-    window.addEventListener('toggle-recording', handleHotkey);
-    return () => window.removeEventListener('toggle-recording', handleHotkey);
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, startImmediately, stopRecording, cancelSession]);
+    console.log('[LiveRecorder] Global __handleHotkey function registered');
+
+    return () => {
+      delete (window as unknown as { __handleHotkey?: unknown }).__handleHotkey;
+    };
+  }, []);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

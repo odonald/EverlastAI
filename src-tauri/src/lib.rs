@@ -45,27 +45,32 @@ pub fn run() {
                         println!("Global hotkey pressed!");
 
                         if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            // Check if window is hidden - if so, we need to wake up the JS context
-                            // macOS suspends JS execution in hidden webviews
-                            let was_hidden = !window.is_visible().unwrap_or(true);
+                            let was_visible = window.is_visible().unwrap_or(false);
+                            let was_focused = window.is_focused().unwrap_or(false);
+                            println!("Window state - visible: {}, focused: {}", was_visible, was_focused);
 
-                            if was_hidden {
-                                println!("Window was hidden, showing to wake up JS...");
-                                // Show window to wake up JS engine - JS will hide it after recording starts
+                            // Always show window first - required for JS to execute and getUserMedia to work
+                            if !was_visible {
+                                println!("Showing window for JS execution...");
                                 let _ = window.show();
                             }
 
-                            // Use eval to directly call the recording function
-                            // Pass background flag so JS knows to start immediately and hide window
+                            // Determine if this is a background trigger (window wasn't visible or focused)
+                            let is_background = !was_visible || !was_focused;
+
+                            // Call the global hotkey handler function directly (more reliable than events)
                             let js_code = format!(
-                                "console.log('[Rust] Hotkey JS executing, background: {}'); \
-                                 window.__hotkeyBackground = {}; \
-                                 window.dispatchEvent(new Event('toggle-recording'));",
-                                was_hidden, was_hidden
+                                "console.log('[Rust->JS] Calling __handleHotkey({})'); \
+                                 if (typeof window.__handleHotkey === 'function') {{ \
+                                     window.__handleHotkey({}); \
+                                 }} else {{ \
+                                     console.error('__handleHotkey not registered yet'); \
+                                 }}",
+                                is_background, is_background
                             );
 
                             match window.eval(&js_code) {
-                                Ok(_) => println!("JS eval called (background: {})", was_hidden),
+                                Ok(_) => println!("JS function called (background: {})", is_background),
                                 Err(e) => eprintln!("Failed to execute JS: {}", e),
                             }
                         }
