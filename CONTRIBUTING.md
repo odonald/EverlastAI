@@ -1,6 +1,6 @@
-# Contributing to EverlastAI
+# Contributing to Everlast AI Recorder
 
-First off, thank you for considering contributing to EverlastAI! It's people like you that make EverlastAI such a great tool.
+First off, thank you for considering contributing to Everlast AI Recorder! It's people like you that make Everlast AI Recorder such a great tool.
 
 ## Code of Conduct
 
@@ -317,4 +317,4 @@ Contributors are recognized in:
 - Release notes (for significant contributions)
 - README acknowledgments section
 
-Thank you for contributing to EverlastAI!
+Thank you for contributing to Everlast AI Recorder!

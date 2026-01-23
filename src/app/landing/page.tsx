@@ -177,21 +177,21 @@ const DOWNLOAD_LINKS = {
     label: 'Download for macOS',
     icon: AppleIcon,
     version: 'macOS 12+',
-    file: 'EverlastAI-1.0.0-arm64.dmg',
+    file: 'Everlast AI Recorder-1.0.0-arm64.dmg',
   },
   windows: {
     url: '#download-windows',
     label: 'Download for Windows',
     icon: WindowsIcon,
     version: 'Windows 10+',
-    file: 'EverlastAI-1.0.0-x64.msi',
+    file: 'Everlast AI Recorder-1.0.0-x64.msi',
   },
   linux: {
     url: '#download-linux',
     label: 'Download for Linux',
     icon: LinuxIcon,
     version: 'Ubuntu 20.04+',
-    file: 'EverlastAI-1.0.0-amd64.AppImage',
+    file: 'Everlast AI Recorder-1.0.0-amd64.AppImage',
   },
 };
 
@@ -366,7 +366,7 @@ export default function LandingPage() {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                 <MicIcon className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xl font-bold">EverlastAI</span>
+              <span className="text-xl font-bold">Everlast AI Recorder</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -480,7 +480,7 @@ export default function LandingPage() {
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                     <div className="w-3 h-3 rounded-full bg-green-500" />
                   </div>
-                  <div className="flex-1 text-center text-xs text-muted-foreground">EverlastAI</div>
+                  <div className="flex-1 text-center text-xs text-muted-foreground">Everlast AI Recorder</div>
                 </div>
                 {/* App preview */}
                 <div className="aspect-[16/10] bg-gradient-to-br from-card to-muted/30 p-8">
@@ -695,7 +695,7 @@ export default function LandingPage() {
             <div className="relative grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                  Download EverlastAI
+                  Download Everlast AI Recorder
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8">
                   Available for macOS, Windows, and Linux. Free to use with optional premium features.
@@ -762,7 +762,7 @@ export default function LandingPage() {
 
                 <div className="mt-6 p-4 rounded-lg bg-muted/50 border">
                   <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">Note:</strong> EverlastAI requires a microphone for voice recording.
+                    <strong className="text-foreground">Note:</strong> Everlast AI Recorder requires a microphone for voice recording.
                     For AI features, you&apos;ll need API keys from Deepgram, OpenAI, or Anthropic — or use free local alternatives like Whisper and Ollama.
                   </p>
                 </div>
@@ -779,7 +779,7 @@ export default function LandingPage() {
             Ready to transform how you capture ideas?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of professionals who use EverlastAI to turn voice into action.
+            Join thousands of professionals who use Everlast AI Recorder to turn voice into action.
           </p>
           <Button size="lg" className="h-14 px-8 text-lg gap-2" asChild>
             <a href="#download">
@@ -799,7 +799,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
                   <MicIcon className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-lg font-bold">EverlastAI</span>
+                <span className="text-lg font-bold">Everlast AI Recorder</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Voice to enriched content, powered by AI.
@@ -834,7 +834,7 @@ export default function LandingPage() {
           </div>
           <div className="mt-12 pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} EverlastAI. All rights reserved.
+              © {new Date().getFullYear()} Everlast AI Recorder. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">

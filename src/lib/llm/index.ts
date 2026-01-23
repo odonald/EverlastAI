@@ -3,7 +3,7 @@ import { enrichWithClaude } from './claude';
 import { enrichWithOllama } from './ollama';
 
 export type LLMProvider = 'openai' | 'anthropic' | 'ollama';
-export type EnrichmentMode = 'auto' | 'notes' | 'summary' | 'action-items' | 'format' | 'translate' | 'insights' | 'cleanup' | 'daily-summary' | 'custom';
+export type EnrichmentMode = 'auto' | 'notes' | 'summary' | 'action-items' | 'format' | 'translate' | 'insights' | 'cleanup' | 'daily-summary' | 'prompts' | 'custom';
 
 // Supported languages for translation
 export const SUPPORTED_LANGUAGES = [
@@ -196,6 +196,35 @@ Then provide:
 - Notable participants or collaborations
 
 Keep the summary concise but comprehensive. Focus on what's most actionable and memorable from the day. Do not include recording counts or durations - just the content insights.`,
+
+    prompts: `You are an expert prompt engineer. Analyze the transcript and generate useful AI prompts that the user can directly use with AI assistants like ChatGPT, Claude, or others.
+
+INPUT: A transcript of a conversation or voice recording.
+
+OUTPUT FORMAT:
+Generate 3-5 practical prompts based on the transcript content. Each prompt should:
+1. Be actionable and ready to use
+2. Help the user explore or act on the topics discussed
+3. Be specific enough to get useful AI responses
+
+Format each prompt as:
+
+**[Category/Purpose]**
+\`\`\`
+[The actual prompt text that can be copied and used directly]
+\`\`\`
+_Why this helps: [Brief explanation of what this prompt will achieve]_
+
+---
+
+Categories to consider:
+- **Research/Learn More**: Prompts to dive deeper into topics mentioned
+- **Take Action**: Prompts to help implement ideas or decisions
+- **Clarify/Explain**: Prompts to better understand concepts discussed
+- **Create Content**: Prompts to generate related documents, emails, or materials
+- **Problem Solve**: Prompts to address challenges mentioned
+
+Make prompts specific to the actual content. Avoid generic prompts. Include relevant context from the transcript in each prompt.`,
 
     custom: `You are a helpful assistant processing a transcript. Follow the user's instruction provided in the conversation.`,
   };

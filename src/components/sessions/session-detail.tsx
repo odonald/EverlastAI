@@ -26,6 +26,7 @@ import {
   Calendar,
   Info,
   Wand2,
+  MessageSquareText,
 } from 'lucide-react';
 import { cn, formatDuration, formatTimestamp } from '@/lib/utils';
 import { FullSession, addEnrichmentToSession, deleteEnrichmentFromSession, updateSpeakerName } from '@/lib/sessions';
@@ -101,6 +102,14 @@ const AI_ACTIONS = [
     description: 'Clean up the transcript by fixing grammar, removing filler words, and improving readability.',
   },
   {
+    id: 'prompts' as const,
+    label: 'Prompts',
+    icon: MessageSquareText,
+    color: 'bg-fuchsia-500',
+    lightColor: 'bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400',
+    description: 'Generate AI prompts based on the transcript that you can use with ChatGPT, Claude, or other AI assistants.',
+  },
+  {
     id: 'custom' as const,
     label: 'Custom',
     icon: Wand2,
@@ -118,6 +127,7 @@ function getTabLabel(type: string, targetLanguage?: string, customLabel?: string
     insights: 'Insights',
     translate: targetLanguage ? `${targetLanguage}` : 'Translation',
     cleanup: 'Formatted',
+    prompts: 'Prompts',
     custom: customLabel || 'Custom',
     notes: 'Notes',
   };

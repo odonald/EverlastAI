@@ -33,6 +33,7 @@ interface LiveUtterance {
 interface LiveRecorderProps {
   onRecordingStart: () => void;
   onRecordingComplete: (transcription: TranscriptionResult) => void;
+  onRecordingCancelled?: () => void;
   isProcessing: boolean;
   onOpenSettings?: () => void;
 }
@@ -64,6 +65,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
 export function LiveRecorder({
   onRecordingStart,
   onRecordingComplete,
+  onRecordingCancelled,
   isProcessing,
   onOpenSettings
 }: LiveRecorderProps) {
@@ -442,9 +444,10 @@ export function LiveRecorder({
     const allText = chronologicalUtterances.map(u => u.text).join(' ');
     const wordCount = allText.split(/\s+/).filter(w => w).length;
 
-    // If no words were detected, skip saving
+    // If no words were detected, skip saving and notify parent
     if (wordCount === 0) {
       console.log('[Recording] Empty recording detected, discarding without saving');
+      onRecordingCancelled?.();
       return;
     }
 
@@ -497,7 +500,7 @@ export function LiveRecorder({
     };
 
     onRecordingComplete(result);
-  }, [utterances, detectedLanguages, settings.transcriptionProvider, onRecordingComplete]);
+  }, [utterances, detectedLanguages, settings.transcriptionProvider, onRecordingComplete, onRecordingCancelled]);
 
   const cancelSession = useCallback(() => {
     // Clean up any initialized resources (from countdown)
@@ -617,7 +620,10 @@ export function LiveRecorder({
 
         {/* New Recording Card */}
         <div
-          onClick={hasRequiredKeys ? () => setIsSessionActive(true) : undefined}
+          onClick={hasRequiredKeys ? () => {
+            setIsSessionActive(true);
+            startWithCountdown();
+          } : undefined}
           className={cn(
             'group relative w-full max-w-md rounded-3xl border-2 border-dashed p-8 text-center transition-all duration-300',
             hasRequiredKeys

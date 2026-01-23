@@ -6,7 +6,7 @@ import { Providers } from '@/components/providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'EverlastAI - Voice to Enriched Text',
+  title: 'Everlast AI Recorder - Voice to Enriched Text',
   description: 'Transform your voice into structured, AI-enriched content',
 };
 

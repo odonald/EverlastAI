@@ -143,7 +143,7 @@ pub fn update_tray_for_recording(app: &AppHandle, is_recording: bool) {
     if let Some(tray) = app.tray_by_id(&tray_id) {
         println!("Found tray, updating icon and tooltip...");
         if is_recording {
-            if let Err(e) = tray.set_tooltip(Some("EverlastAI - Recording...")) {
+            if let Err(e) = tray.set_tooltip(Some("Everlast AI Recorder - Recording...")) {
                 println!("Failed to set tooltip: {:?}", e);
             }
             // Set recording icon
@@ -158,7 +158,7 @@ pub fn update_tray_for_recording(app: &AppHandle, is_recording: bool) {
                 Err(e) => println!("Failed to load recording icon: {:?}", e),
             }
         } else {
-            if let Err(e) = tray.set_tooltip(Some("EverlastAI - Voice to Text")) {
+            if let Err(e) = tray.set_tooltip(Some("Everlast AI Recorder - Voice to Text")) {
                 println!("Failed to set tooltip: {:?}", e);
             }
             // Restore normal icon

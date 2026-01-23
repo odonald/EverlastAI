@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EverlastAI is a desktop application that transforms voice input into enriched, structured text. It combines Next.js 14 (static export) with Tauri 2.0 for cross-platform desktop deployment.
+Everlast AI Recorder is a desktop application that transforms voice input into enriched, structured text. It combines Next.js 14 (static export) with Tauri 2.0 for cross-platform desktop deployment.
 
 **Core pipeline:** Global hotkey → Voice recording → AI transcription (with speaker diarization) → LLM enrichment → Session storage
 

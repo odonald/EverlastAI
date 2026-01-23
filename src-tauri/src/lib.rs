@@ -76,7 +76,7 @@ pub fn run() {
             #[cfg(desktop)]
             {
                 // Create tray menu
-                let quit = MenuItem::with_id(app, "quit", "Quit EverlastAI", true, None::<&str>)?;
+                let quit = MenuItem::with_id(app, "quit", "Quit Everlast AI Recorder", true, None::<&str>)?;
                 let show = MenuItem::with_id(app, "show", "Show Window", true, None::<&str>)?;
                 let menu = Menu::with_items(app, &[&show, &quit])?;
 
@@ -89,7 +89,7 @@ pub fn run() {
                 let _tray = TrayIconBuilder::with_id(commands::TRAY_ID)
                     .icon(icon)
                     .menu(&menu)
-                    .tooltip("EverlastAI - Voice to Text")
+                    .tooltip("Everlast AI Recorder - Voice to Text")
                     .on_menu_event(move |app, event| {
                         match event.id.as_ref() {
                             "quit" => {

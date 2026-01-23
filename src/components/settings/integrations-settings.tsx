@@ -169,7 +169,7 @@ export function IntegrationsSettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           test: true,
-          message: 'Test from EverlastAI',
+          message: 'Test from Everlast AI Recorder',
           timestamp: new Date().toISOString(),
         }),
       });

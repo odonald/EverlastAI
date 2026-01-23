@@ -332,7 +332,7 @@ export async function testWebhook(
     timestamp: new Date().toISOString(),
     metadata: {
       test: true,
-      message: 'This is a test webhook from EverlastAI',
+      message: 'This is a test webhook from Everlast AI Recorder',
     },
   };
 

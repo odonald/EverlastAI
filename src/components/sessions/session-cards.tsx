@@ -85,12 +85,10 @@ export function SessionCards({
           </div>
 
           {/* Daily Summary */}
-          {dateSessions.length > 1 && (
-            <DailySummary
-              sessions={dateSessions}
-              dateLabel={dateLabel}
-            />
-          )}
+          <DailySummary
+            sessions={dateSessions}
+            dateLabel={dateLabel}
+          />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {dateSessions.map((session, index) => (
@@ -367,8 +365,14 @@ Preview: ${s.preview}
             <div className="py-4 text-center">
               <p className="text-sm text-destructive">{error}</p>
               <button
-                onClick={handleExpand}
-                className="mt-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setError(null);
+                  setSummary(null);
+                  // Close and reopen to trigger generation
+                  setExpanded(false);
+                  setTimeout(() => handleExpand(), 100);
+                }}
+                className="mt-2 text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
               >
                 Try again
               </button>
@@ -386,8 +390,44 @@ Preview: ${s.preview}
               </div>
             </div>
           ) : (
-            <div className="py-4 text-center">
-              <Loader2 className="h-5 w-5 animate-spin text-violet-500 mx-auto" />
+            <div className="py-6 text-center">
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  setError(null);
+                  try {
+                    const context = sessions.map((s, i) => {
+                      return `Recording ${i + 1}: "${s.title}"
+Duration: ${formatDurationHuman(s.duration)}
+Preview: ${s.preview}
+---`;
+                    }).join('\n\n');
+
+                    const result = await enrich(context, {
+                      provider: settings.llmProvider as LLMProvider,
+                      mode: 'daily-summary',
+                      apiKey: getApiKey(),
+                      ollamaEndpoint: settings.ollamaEndpoint,
+                      ollamaModel: settings.ollamaModel,
+                    });
+
+                    setSummary(result);
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                      summary: result,
+                      timestamp: Date.now(),
+                    }));
+                  } catch (err) {
+                    console.error('Failed to generate daily summary:', err);
+                    setError(err instanceof Error ? err.message : 'Failed to generate summary');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-700 dark:text-violet-300 text-sm font-medium transition-colors"
+              >
+                <Sparkles className="h-4 w-4" />
+                Generate Summary
+              </button>
             </div>
           )}
         </div>
