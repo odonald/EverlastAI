@@ -54,10 +54,29 @@ pub fn run() {
 
                             // CRITICAL: macOS throttles JS execution in unfocused webviews
                             // We MUST focus the window for JS to execute immediately
+                            // To avoid visual flash, move window off-screen before showing
                             if !was_focused {
-                                println!("Focusing window for JS execution...");
+                                println!("Background mode: moving window off-screen and focusing...");
+
+                                // Save current position for later restoration
+                                let original_pos = window.outer_position().ok();
+
+                                // Move window off-screen (invisible to user)
+                                use tauri::LogicalPosition;
+                                let _ = window.set_position(LogicalPosition::new(-10000.0, -10000.0));
+
+                                // Now show and focus - JS will execute but user sees nothing
                                 let _ = window.show();
                                 let _ = window.set_focus();
+
+                                // Store original position for JS to restore later
+                                if let Some(pos) = original_pos {
+                                    let restore_js = format!(
+                                        "window.__originalPosition = {{ x: {}, y: {} }};",
+                                        pos.x, pos.y
+                                    );
+                                    let _ = window.eval(&restore_js);
+                                }
                             }
 
                             // Call the global hotkey handler function directly

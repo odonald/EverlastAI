@@ -24,7 +24,17 @@ async function showAndFocusWindow() {
   if (typeof window === 'undefined' || !window.__TAURI__) return;
   try {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    const { LogicalPosition } = await import('@tauri-apps/api/dpi');
     const win = getCurrentWindow();
+
+    // Restore original position if it was moved off-screen
+    const originalPos = (window as unknown as { __originalPosition?: { x: number; y: number } }).__originalPosition;
+    if (originalPos) {
+      console.log('[showAndFocusWindow] Restoring position to:', originalPos);
+      await win.setPosition(new LogicalPosition(originalPos.x, originalPos.y));
+      delete (window as unknown as { __originalPosition?: unknown }).__originalPosition;
+    }
+
     await win.show();
     await win.setFocus();
   } catch (e) {
