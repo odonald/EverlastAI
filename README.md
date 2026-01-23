@@ -1,8 +1,20 @@
 <div align="center">
 
-# 🎙️ EverlastAI
+# 🎙️ Everlast AI Recorder
 
 **Transform your voice into AI-enriched, structured content**
+
+---
+
+### 🔑 Demo Access
+
+Try the app with these demo credentials:
+
+| Email | Password |
+|-------|----------|
+| `demo@demo.com` | `Demo123!` |
+
+---
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Built with Tauri](https://img.shields.io/badge/Built%20with-Tauri-FFC131?logo=tauri)](https://tauri.app)
@@ -20,18 +32,18 @@
 
 ## 🌟 Overview
 
-EverlastAI is a **privacy-focused desktop application** that revolutionizes voice-to-text workflows. Capture ideas, meeting notes, and thoughts through natural speech, then watch as AI transforms them into structured, actionable content.
+Everlast AI Recorder is a **privacy-focused desktop application** that revolutionizes voice-to-text workflows. Capture ideas, meeting notes, and thoughts through natural speech, then watch as AI transforms them into structured, actionable content.
 
-Unlike simple voice recorders, EverlastAI provides:
+Unlike simple voice recorders, Everlast AI Recorder provides:
 - **Real-time transcription** with speaker identification
 - **AI-powered enrichment** (summaries, tasks, insights, translation)
 - **Beautiful, formatted output** ready for immediate use
 - **Privacy-first design** with local encrypted storage
 - **Seamless export** to PDF, DOCX, Markdown, Notion, and webhooks
 
-### Why EverlastAI?
+### Why Everlast AI Recorder?
 
-| Traditional Voice-to-Text | EverlastAI |
+| Traditional Voice-to-Text | Everlast AI Recorder |
 |--------------------------|------------|
 | Raw, unformatted transcripts | Structured, formatted output |
 | No speaker identification | Full speaker diarization with custom names |
@@ -156,9 +168,9 @@ NEXT_PUBLIC_NOTION_ENABLED=true
 
 #### macOS Permissions
 
-EverlastAI requires **Accessibility permissions** for global hotkeys:
+Everlast AI Recorder requires **Accessibility permissions** for global hotkeys:
 1. Go to System Preferences → Privacy & Security → Accessibility
-2. Add EverlastAI to the allowed apps list
+2. Add Everlast AI Recorder to the allowed apps list
 3. Restart the application
 
 ---
@@ -167,7 +179,7 @@ EverlastAI requires **Accessibility permissions** for global hotkeys:
 
 ### Architecture
 
-EverlastAI uses a hybrid architecture combining Next.js and Tauri:
+Everlast AI Recorder uses a hybrid architecture combining Next.js and Tauri:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -376,7 +388,7 @@ Built with these amazing technologies:
 - [shadcn/ui](https://ui.shadcn.com) - UI components
 - [Auth0](https://auth0.com) - Authentication
 
-Special thanks to all [contributors](https://github.com/odonald/everlast/graphs/contributors) who help make EverlastAI better!
+Special thanks to all [contributors](https://github.com/odonald/everlast/graphs/contributors) who help make Everlast AI Recorder better!
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "EverlastAI",
+  "productName": "Everlast AI Recorder",
   "version": "0.1.0",
   "identifier": "ai.everlast.desktop",
   "build": {
@@ -13,13 +13,13 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "EverlastAI",
-        "width": 400,
-        "height": 550,
-        "minWidth": 350,
-        "minHeight": 450,
-        "maxWidth": 500,
-        "maxHeight": 700,
+        "title": "Everlast AI Recorder",
+        "width": 440,
+        "height": 600,
+        "minWidth": 380,
+        "minHeight": 500,
+        "maxWidth": 520,
+        "maxHeight": 750,
         "center": true,
         "resizable": true,
         "decorations": true,
@@ -53,7 +53,7 @@
     "createUpdaterArtifacts": false,
     "category": "Productivity",
     "shortDescription": "Voice to Enriched Text",
-    "longDescription": "Transform your voice into structured, AI-enriched content with EverlastAI",
+    "longDescription": "Transform your voice into structured, AI-enriched content with Everlast AI Recorder",
     "macOS": {
       "minimumSystemVersion": "10.13",
       "entitlements": "./entitlements.plist",

@@ -367,7 +367,7 @@ export default function Home() {
         </div>
         <div className="animate-fade-in-up stagger-3 rounded-2xl border bg-card p-5 shadow-soft">
           <p className="text-sm text-card-foreground">
-            You can now close this tab and return to <strong className="text-primary">EverlastAI</strong>.
+            You can now close this tab and return to <strong className="text-primary">Everlast AI Recorder</strong>.
           </p>
         </div>
       </main>
@@ -400,45 +400,45 @@ export default function Home() {
   // Not authenticated - Welcome screen
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen flex-col">
+      <main className="flex h-screen flex-col overflow-hidden">
         {/* Minimal header */}
-        <header className="flex shrink-0 items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-soft">
-              <Mic className="h-5 w-5 text-primary-foreground" />
+        <header className="flex shrink-0 items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-soft">
+              <Mic className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-xl font-semibold">EverlastAI</span>
+            <span className="text-lg font-semibold">Everlast AI Recorder</span>
           </div>
-          <LoginButton />
+          <LoginButton size="sm" />
         </header>
 
         {/* Hero section */}
-        <div className="flex flex-1 flex-col items-center justify-center px-8 pb-20">
+        <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8">
           <div className="max-w-lg text-center">
             {/* Icon */}
-            <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-soft animate-float">
-              <Mic className="h-12 w-12 text-primary" />
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-soft animate-float">
+              <Mic className="h-8 w-8 text-primary" />
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tight">
               Voice to
               <span className="gradient-text"> Enriched Text</span>
             </h1>
 
             {/* Subheadline */}
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-3 text-base text-muted-foreground">
               Record, transcribe with speaker detection, and transform your recordings with AI-powered insights.
             </p>
 
             {/* Features */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <div className="flex items-center gap-2 rounded-full bg-muted/50 px-4 py-2 text-sm">
-                <Sparkles className="h-4 w-4 text-primary" />
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 <span>AI Enrichment</span>
               </div>
-              <div className="flex items-center gap-2 rounded-full bg-muted/50 px-4 py-2 text-sm">
-                <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs">
+                <svg className="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -446,8 +446,8 @@ export default function Home() {
                 </svg>
                 <span>Speaker Detection</span>
               </div>
-              <div className="flex items-center gap-2 rounded-full bg-muted/50 px-4 py-2 text-sm">
-                <svg className="h-4 w-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs">
+                <svg className="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
                   <path d="M2 12h20" />
@@ -457,7 +457,7 @@ export default function Home() {
             </div>
 
             {/* CTA */}
-            <div className="mt-10">
+            <div className="mt-6">
               <LoginButton size="lg" />
             </div>
           </div>
@@ -498,7 +498,7 @@ export default function Home() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
               <Mic className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-lg font-semibold">EverlastAI</span>
+            <span className="text-lg font-semibold">Everlast AI Recorder</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -544,7 +544,7 @@ export default function Home() {
             <Mic className="h-4 w-4 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold leading-none">EverlastAI</h1>
+            <h1 className="text-lg font-semibold leading-none">Everlast AI Recorder</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Voice to Text</p>
           </div>
         </div>
@@ -569,6 +569,7 @@ export default function Home() {
             <LiveRecorder
               onRecordingStart={() => setIsRecording(true)}
               onRecordingComplete={handleRecordingComplete}
+              onRecordingCancelled={() => setIsRecording(false)}
               onOpenSettings={() => setSettingsOpen(true)}
               isProcessing={isProcessing}
             />
