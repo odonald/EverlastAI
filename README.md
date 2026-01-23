@@ -1,8 +1,16 @@
+> **⚠️ IMPORTANT DISCLAIMER**
+>
+> This project is an **independent contest submission** to the EverlastAI Contest. It is **NOT** a product produced, maintained, endorsed, or released by EverlastAI. This is a personal/team project created solely for the competition. Any similarity in naming is for contest identification purposes only.
+
+---
+
 <div align="center">
 
 # 🎙️ Everlast AI Recorder
 
 **Transform your voice into AI-enriched, structured content**
+
+*Contest Submission - Independent Project*
 
 ---
 
