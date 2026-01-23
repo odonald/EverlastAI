@@ -2,17 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const NOTION_CLIENT_ID = process.env.NOTION_CLIENT_ID;
 const NOTION_CLIENT_SECRET = process.env.NOTION_CLIENT_SECRET;
-const NOTION_REDIRECT_URI = process.env.NOTION_REDIRECT_URI || 'http://localhost:3000/notion/callback';
+const NOTION_REDIRECT_URI =
+  process.env.NOTION_REDIRECT_URI || 'http://localhost:3000/notion/callback';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { code, state } = body;
 
   if (!code) {
-    return NextResponse.json(
-      { error: 'No authorization code provided' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'No authorization code provided' }, { status: 400 });
   }
 
   // Parse state to get sessionId and CSRF token
@@ -28,10 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!NOTION_CLIENT_ID || !NOTION_CLIENT_SECRET) {
-    return NextResponse.json(
-      { error: 'Notion OAuth not configured' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Notion OAuth not configured' }, { status: 500 });
   }
 
   try {

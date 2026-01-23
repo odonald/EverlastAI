@@ -1,1 +1,30 @@
-{"default":{"identifier":"default","description":"Default capabilities for EverlastAI","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-show","core:window:allow-hide","core:window:allow-set-focus","core:window:allow-is-visible","shell:allow-open","global-shortcut:allow-register","global-shortcut:allow-unregister","global-shortcut:allow-is-registered","store:allow-get","store:allow-set","store:allow-delete","store:allow-keys","store:allow-clear","store:allow-load","store:allow-save","core:menu:default","core:tray:default","deep-link:default","core:event:default"]}}
+{
+  "default": {
+    "identifier": "default",
+    "description": "Default capabilities for EverlastAI",
+    "local": true,
+    "windows": ["main"],
+    "permissions": [
+      "core:default",
+      "core:window:allow-show",
+      "core:window:allow-hide",
+      "core:window:allow-set-focus",
+      "core:window:allow-is-visible",
+      "shell:allow-open",
+      "global-shortcut:allow-register",
+      "global-shortcut:allow-unregister",
+      "global-shortcut:allow-is-registered",
+      "store:allow-get",
+      "store:allow-set",
+      "store:allow-delete",
+      "store:allow-keys",
+      "store:allow-clear",
+      "store:allow-load",
+      "store:allow-save",
+      "core:menu:default",
+      "core:tray:default",
+      "deep-link:default",
+      "core:event:default"
+    ]
+  }
+}

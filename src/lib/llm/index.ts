@@ -3,7 +3,18 @@ import { enrichWithClaude } from './claude';
 import { enrichWithOllama } from './ollama';
 
 export type LLMProvider = 'openai' | 'anthropic' | 'ollama';
-export type EnrichmentMode = 'auto' | 'notes' | 'summary' | 'action-items' | 'format' | 'translate' | 'insights' | 'cleanup' | 'daily-summary' | 'prompts' | 'custom';
+export type EnrichmentMode =
+  | 'auto'
+  | 'notes'
+  | 'summary'
+  | 'action-items'
+  | 'format'
+  | 'translate'
+  | 'insights'
+  | 'cleanup'
+  | 'daily-summary'
+  | 'prompts'
+  | 'custom';
 
 // Supported languages for translation
 export const SUPPORTED_LANGUAGES = [
@@ -34,11 +45,9 @@ export interface EnrichmentOptions {
   customPrompt?: string; // For custom mode
 }
 
-export async function enrich(
-  text: string,
-  options: EnrichmentOptions
-): Promise<string> {
-  const { provider, mode, apiKey, ollamaEndpoint, ollamaModel, targetLanguage, customPrompt } = options;
+export async function enrich(text: string, options: EnrichmentOptions): Promise<string> {
+  const { provider, mode, apiKey, ollamaEndpoint, ollamaModel, targetLanguage, customPrompt } =
+    options;
 
   switch (provider) {
     case 'openai':
@@ -46,7 +55,14 @@ export async function enrich(
     case 'anthropic':
       return enrichWithClaude(text, mode, apiKey, targetLanguage, customPrompt);
     case 'ollama':
-      return enrichWithOllama(text, mode, ollamaEndpoint, ollamaModel, targetLanguage, customPrompt);
+      return enrichWithOllama(
+        text,
+        mode,
+        ollamaEndpoint,
+        ollamaModel,
+        targetLanguage,
+        customPrompt
+      );
     default:
       throw new Error(`Unknown LLM provider: ${provider}`);
   }
@@ -66,11 +82,13 @@ ${text.slice(0, 1000)}`;
 
   switch (provider) {
     case 'openai':
-      return enrichWithOpenAI(titlePrompt, 'format', apiKey).then(t => t.slice(0, 60).trim());
+      return enrichWithOpenAI(titlePrompt, 'format', apiKey).then((t) => t.slice(0, 60).trim());
     case 'anthropic':
-      return enrichWithClaude(titlePrompt, 'format', apiKey).then(t => t.slice(0, 60).trim());
+      return enrichWithClaude(titlePrompt, 'format', apiKey).then((t) => t.slice(0, 60).trim());
     case 'ollama':
-      return enrichWithOllama(titlePrompt, 'format', ollamaEndpoint, ollamaModel).then(t => t.slice(0, 60).trim());
+      return enrichWithOllama(titlePrompt, 'format', ollamaEndpoint, ollamaModel).then((t) =>
+        t.slice(0, 60).trim()
+      );
     default:
       // Fallback: use first sentence
       const firstSentence = text.split(/[.!?]/)[0];
@@ -80,7 +98,11 @@ ${text.slice(0, 1000)}`;
   }
 }
 
-export function getSystemPrompt(mode: EnrichmentMode, targetLanguage?: string, customPrompt?: string): string {
+export function getSystemPrompt(
+  mode: EnrichmentMode,
+  targetLanguage?: string,
+  customPrompt?: string
+): string {
   if (mode === 'custom' && customPrompt) {
     return `You are a helpful assistant processing a transcript. Follow the user's instruction exactly.
 

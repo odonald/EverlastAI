@@ -145,40 +145,46 @@ export function useSettings() {
   }, []);
 
   // Save API keys to secure storage
-  const saveApiKeys = useCallback(async (keys: Settings['apiKeys']) => {
-    if (typeof window === 'undefined' || !window.__TAURI__ || !user?.email) {
-      return;
-    }
+  const saveApiKeys = useCallback(
+    async (keys: Settings['apiKeys']) => {
+      if (typeof window === 'undefined' || !window.__TAURI__ || !user?.email) {
+        return;
+      }
 
-    const keysJson = JSON.stringify(keys);
-    // Skip if keys haven't changed
-    if (keysJson === lastSavedKeysRef.current) {
-      return;
-    }
+      const keysJson = JSON.stringify(keys);
+      // Skip if keys haven't changed
+      if (keysJson === lastSavedKeysRef.current) {
+        return;
+      }
 
-    setIsSaving(true);
-    try {
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('save_api_keys', {
-        keys,
-        userId: user.email,
-      });
-      lastSavedKeysRef.current = keysJson;
-      console.log('[Settings] API keys saved for user:', user.email);
-    } catch (error) {
-      console.error('Failed to save API keys:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [user?.email]);
+      setIsSaving(true);
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('save_api_keys', {
+          keys,
+          userId: user.email,
+        });
+        lastSavedKeysRef.current = keysJson;
+        console.log('[Settings] API keys saved for user:', user.email);
+      } catch (error) {
+        console.error('Failed to save API keys:', error);
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [user?.email]
+  );
 
   // Debounced autosave when API keys change
   useEffect(() => {
     // Only autosave if we have a user and keys have values
     if (!user?.email) return;
 
-    const hasAnyKey = settings.apiKeys.deepgram || settings.apiKeys.elevenlabs ||
-                      settings.apiKeys.openai || settings.apiKeys.anthropic;
+    const hasAnyKey =
+      settings.apiKeys.deepgram ||
+      settings.apiKeys.elevenlabs ||
+      settings.apiKeys.openai ||
+      settings.apiKeys.anthropic;
     if (!hasAnyKey) return;
 
     // Clear previous timeout
@@ -276,28 +282,28 @@ export function useSettings() {
 
       if (settings.apiKeys.deepgram) {
         validations.push(
-          validateApiKey('deepgram', settings.apiKeys.deepgram).then(valid => {
+          validateApiKey('deepgram', settings.apiKeys.deepgram).then((valid) => {
             newValidation.deepgram = valid;
           })
         );
       }
       if (settings.apiKeys.elevenlabs) {
         validations.push(
-          validateApiKey('elevenlabs', settings.apiKeys.elevenlabs).then(valid => {
+          validateApiKey('elevenlabs', settings.apiKeys.elevenlabs).then((valid) => {
             newValidation.elevenlabs = valid;
           })
         );
       }
       if (settings.apiKeys.openai) {
         validations.push(
-          validateApiKey('openai', settings.apiKeys.openai).then(valid => {
+          validateApiKey('openai', settings.apiKeys.openai).then((valid) => {
             newValidation.openai = valid;
           })
         );
       }
       if (settings.apiKeys.anthropic) {
         validations.push(
-          validateApiKey('anthropic', settings.apiKeys.anthropic).then(valid => {
+          validateApiKey('anthropic', settings.apiKeys.anthropic).then((valid) => {
             newValidation.anthropic = valid;
           })
         );

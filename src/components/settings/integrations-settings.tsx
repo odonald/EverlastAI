@@ -35,7 +35,9 @@ function NotionLogo({ className }: { className?: string }) {
 export function IntegrationsSettings() {
   const { settings, updateSettings } = useSettings();
   const [webhookUrl, setWebhookUrl] = useState(settings.webhookUrl);
-  const [webhookStatus, setWebhookStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [webhookStatus, setWebhookStatus] = useState<'idle' | 'testing' | 'success' | 'error'>(
+    'idle'
+  );
   const [webhookError, setWebhookError] = useState<string | null>(null);
 
   // Notion auth state
@@ -222,16 +224,19 @@ export function IntegrationsSettings() {
         }, 1000);
 
         // Timeout after 5 minutes
-        setTimeout(() => {
-          if (pollingRef.current) {
-            clearInterval(pollingRef.current);
-            pollingRef.current = null;
-          }
-          if (isWaitingForNotion) {
-            setIsWaitingForNotion(false);
-            setNotionError('Connection timed out. Please try again.');
-          }
-        }, 5 * 60 * 1000);
+        setTimeout(
+          () => {
+            if (pollingRef.current) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            if (isWaitingForNotion) {
+              setIsWaitingForNotion(false);
+              setNotionError('Connection timed out. Please try again.');
+            }
+          },
+          5 * 60 * 1000
+        );
       } else {
         // Standard redirect for browser
         window.location.href = authUrl;
@@ -239,7 +244,9 @@ export function IntegrationsSettings() {
     } catch (error) {
       console.error('Failed to start Notion auth:', error);
       setIsWaitingForNotion(false);
-      setNotionError(error instanceof Error ? error.message : 'Failed to start Notion auth. Please try again.');
+      setNotionError(
+        error instanceof Error ? error.message : 'Failed to start Notion auth. Please try again.'
+      );
     }
   };
 
@@ -298,14 +305,14 @@ export function IntegrationsSettings() {
               className={cn(
                 'w-full rounded-xl border bg-background px-4 py-3 text-sm',
                 'placeholder:text-muted-foreground/50',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary',
+                'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
                 'transition-all duration-200'
               )}
             />
           </div>
 
           {webhookError && (
-            <p className="text-sm text-destructive flex items-center gap-2">
+            <p className="flex items-center gap-2 text-sm text-destructive">
               <X className="h-4 w-4" />
               {webhookError}
             </p>
@@ -365,9 +372,7 @@ export function IntegrationsSettings() {
               )}
               <div className="flex-1">
                 <p className="font-medium">{settings.notion.workspaceName}</p>
-                <p className="text-xs text-muted-foreground">
-                  Workspace connected
-                </p>
+                <p className="text-xs text-muted-foreground">Workspace connected</p>
               </div>
               <Button
                 variant="ghost"
@@ -375,37 +380,37 @@ export function IntegrationsSettings() {
                 onClick={handleNotionDisconnect}
                 className="rounded-xl text-muted-foreground hover:text-destructive"
               >
-                <Unlink className="h-4 w-4 mr-2" />
+                <Unlink className="mr-2 h-4 w-4" />
                 Disconnect
               </Button>
             </div>
 
             {/* Parent page selection info */}
-            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4">
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
               <p className="text-sm text-amber-700 dark:text-amber-300">
-                <strong>Note:</strong> When exporting, you&apos;ll be asked to enter a Notion page ID
-                where your transcripts will be created as subpages.
+                <strong>Note:</strong> When exporting, you&apos;ll be asked to enter a Notion page
+                ID where your transcripts will be created as subpages.
               </p>
             </div>
           </div>
         ) : isWaitingForNotion ? (
           /* Waiting for Notion auth in browser */
           <div className="space-y-4">
-            <div className="flex flex-col items-center gap-4 rounded-xl bg-primary/5 border border-primary/20 p-6 text-center">
+            <div className="flex flex-col items-center gap-4 rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
               <div className="relative">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                  <Globe className="h-8 w-8 text-primary animate-pulse" />
+                  <Globe className="h-8 w-8 animate-pulse text-primary" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary">
-                  <Loader2 className="h-3.5 w-3.5 text-primary-foreground animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-foreground" />
                 </div>
               </div>
 
               <div>
                 <h4 className="font-semibold">Continue in your browser</h4>
-                <p className="mt-1 text-sm text-muted-foreground max-w-xs">
-                  A browser window has opened for you to connect your Notion account.
-                  Return here when you&apos;re done.
+                <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                  A browser window has opened for you to connect your Notion account. Return here
+                  when you&apos;re done.
                 </p>
               </div>
 
@@ -422,14 +427,14 @@ export function IntegrationsSettings() {
         ) : (
           <div className="space-y-4">
             {notionError && (
-              <div className="flex items-center gap-2 rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+              <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 <X className="h-4 w-4 shrink-0" />
                 {notionError}
               </div>
             )}
 
             {isNotionConfigured ? (
-              <Button onClick={handleNotionConnect} className="rounded-xl gap-2">
+              <Button onClick={handleNotionConnect} className="gap-2 rounded-xl">
                 <Link2 className="h-4 w-4" />
                 Connect Notion
               </Button>
@@ -437,8 +442,11 @@ export function IntegrationsSettings() {
               <div className="rounded-xl bg-muted/50 p-4">
                 <p className="text-sm text-muted-foreground">
                   Notion integration requires configuration. Add{' '}
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">NOTION_CLIENT_ID</code> and{' '}
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">NOTION_CLIENT_SECRET</code>{' '}
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">NOTION_CLIENT_ID</code>{' '}
+                  and{' '}
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                    NOTION_CLIENT_SECRET
+                  </code>{' '}
                   to your environment variables.
                 </p>
                 <a

@@ -199,7 +199,10 @@ export async function POST(request: NextRequest) {
       // Search for a page the user has access to
       // Since we can't create at workspace root, we'll return an error if no parent specified
       return NextResponse.json(
-        { error: 'Please select a parent page in Notion settings. Notion requires a parent page for new pages.' },
+        {
+          error:
+            'Please select a parent page in Notion settings. Notion requires a parent page for new pages.',
+        },
         { status: 400 }
       );
     }
@@ -240,8 +243,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getSpeakerColor(speaker: number): 'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'default' {
-  const colors: Array<'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'default'> = ['blue', 'green', 'purple', 'orange', 'pink', 'default'];
+function getSpeakerColor(
+  speaker: number
+): 'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'default' {
+  const colors: Array<'blue' | 'green' | 'purple' | 'orange' | 'pink' | 'default'> = [
+    'blue',
+    'green',
+    'purple',
+    'orange',
+    'pink',
+    'default',
+  ];
   return colors[speaker % colors.length];
 }
 

@@ -6,10 +6,7 @@ export async function POST(request: NextRequest) {
     const { text, provider = 'openai', mode = 'auto' } = await request.json();
 
     if (!text || typeof text !== 'string') {
-      return NextResponse.json(
-        { error: 'Text is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
     }
 
     const enrichedText = await enrich(text, { provider, mode });
@@ -17,9 +14,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ enrichedText });
   } catch (error) {
     console.error('Enrichment error:', error);
-    return NextResponse.json(
-      { error: 'Failed to enrich text' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to enrich text' }, { status: 500 });
   }
 }

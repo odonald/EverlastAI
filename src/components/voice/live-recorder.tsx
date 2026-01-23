@@ -19,7 +19,6 @@ async function setTrayRecordingState(recording: boolean) {
   }
 }
 
-
 interface LiveUtterance {
   id: string;
   speaker: number;
@@ -67,7 +66,7 @@ export function LiveRecorder({
   onRecordingComplete,
   onRecordingCancelled,
   isProcessing,
-  onOpenSettings
+  onOpenSettings,
 }: LiveRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isSessionActive, setIsSessionActive] = useState(false);
@@ -110,11 +109,17 @@ export function LiveRecorder({
     }
 
     return true;
-  }, [settings.transcriptionProvider, settings.apiKeys.deepgram, settings.apiKeys.elevenlabs, keyValidation, settingsLoading]);
+  }, [
+    settings.transcriptionProvider,
+    settings.apiKeys.deepgram,
+    settings.apiKeys.elevenlabs,
+    keyValidation,
+    settingsLoading,
+  ]);
 
   // Update speaker count
   useEffect(() => {
-    const speakers = new Set(utterances.map(u => u.speaker));
+    const speakers = new Set(utterances.map((u) => u.speaker));
     setSpeakerCount(speakers.size);
   }, [utterances]);
 
@@ -134,7 +139,7 @@ export function LiveRecorder({
           sampleRate: 16000,
           echoCancellation: true,
           noiseSuppression: true,
-        }
+        },
       });
       streamRef.current = stream;
 
@@ -207,12 +212,12 @@ export function LiveRecorder({
               const altLanguages = alternative.languages as string[] | undefined;
 
               if (channelLang) {
-                setDetectedLanguages(prev => new Set([...Array.from(prev), channelLang]));
+                setDetectedLanguages((prev) => new Set([...Array.from(prev), channelLang]));
               }
               if (altLanguages && altLanguages.length > 0) {
-                setDetectedLanguages(prev => {
+                setDetectedLanguages((prev) => {
                   const newSet = new Set(Array.from(prev));
-                  altLanguages.forEach(lang => newSet.add(lang));
+                  altLanguages.forEach((lang) => newSet.add(lang));
                   return newSet;
                 });
               }
@@ -224,12 +229,14 @@ export function LiveRecorder({
                 const utteranceStart = data.start || 0;
                 const recordingTime = (Date.now() - startTimeRef.current) / 1000;
                 const lastSpeaker = lastSpeakerRef.current;
-                const timeSinceLastUtterance = lastSpeaker ? utteranceStart - lastSpeaker.endTime : Infinity;
+                const timeSinceLastUtterance = lastSpeaker
+                  ? utteranceStart - lastSpeaker.endTime
+                  : Infinity;
 
-                const shouldSmooth = lastSpeaker && (
-                  (recordingTime < 10 && timeSinceLastUtterance < 1.5) ||
-                  timeSinceLastUtterance < 0.5
-                );
+                const shouldSmooth =
+                  lastSpeaker &&
+                  ((recordingTime < 10 && timeSinceLastUtterance < 1.5) ||
+                    timeSinceLastUtterance < 0.5);
 
                 if (words.length === 0) {
                   const smoothedSpeaker = shouldSmooth ? lastSpeaker!.speaker : 0;
@@ -246,7 +253,7 @@ export function LiveRecorder({
                     language: channelLang || 'en',
                   };
                   // Prepend new utterance (newest at top during recording)
-                  setUtterances(prev => [newUtterance, ...prev]);
+                  setUtterances((prev) => [newUtterance, ...prev]);
                 } else {
                   const newUtterances: LiveUtterance[] = [];
                   const rawSpeaker = words[0].speaker ?? 0;
@@ -261,7 +268,7 @@ export function LiveRecorder({
                     const wordLang = word.language || channelLang || 'en';
 
                     if (wordLang) {
-                      setDetectedLanguages(prev => new Set([...Array.from(prev), wordLang]));
+                      setDetectedLanguages((prev) => new Set([...Array.from(prev), wordLang]));
                     }
 
                     const wordGap = currentEnd > 0 ? word.start - currentEnd : 0;
@@ -303,10 +310,13 @@ export function LiveRecorder({
 
                   if (newUtterances.length > 0) {
                     const lastUtterance = newUtterances[newUtterances.length - 1];
-                    lastSpeakerRef.current = { speaker: lastUtterance.speaker, endTime: lastUtterance.end };
+                    lastSpeakerRef.current = {
+                      speaker: lastUtterance.speaker,
+                      endTime: lastUtterance.end,
+                    };
                     // Prepend new utterances (newest at top during recording)
                     // Reverse so newest of this batch is at top
-                    setUtterances(prev => [...newUtterances.reverse(), ...prev]);
+                    setUtterances((prev) => [...newUtterances.reverse(), ...prev]);
                   }
                 }
 
@@ -386,7 +396,11 @@ export function LiveRecorder({
       audioRecorderRef.current = audioMediaRecorder;
 
       audioMediaRecorder.ondataavailable = (e) => {
-        if (socketRef.current?.readyState === WebSocket.OPEN && e.data.size > 0 && !isStoppingRef.current) {
+        if (
+          socketRef.current?.readyState === WebSocket.OPEN &&
+          e.data.size > 0 &&
+          !isStoppingRef.current
+        ) {
           socketRef.current.send(e.data);
         }
       };
@@ -429,7 +443,7 @@ export function LiveRecorder({
     }
 
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
 
@@ -441,8 +455,8 @@ export function LiveRecorder({
     // During recording, they were prepended (newest first) for live view
     const chronologicalUtterances = [...utterances].sort((a, b) => a.start - b.start);
 
-    const allText = chronologicalUtterances.map(u => u.text).join(' ');
-    const wordCount = allText.split(/\s+/).filter(w => w).length;
+    const allText = chronologicalUtterances.map((u) => u.text).join(' ');
+    const wordCount = allText.split(/\s+/).filter((w) => w).length;
 
     // If no words were detected, skip saving and notify parent
     if (wordCount === 0) {
@@ -454,15 +468,17 @@ export function LiveRecorder({
     // Build final result
     const duration = (Date.now() - startTimeRef.current) / 1000;
 
-    const speakerSet = new Set(chronologicalUtterances.map(u => u.speaker));
-    const speakers: SpeakerInfo[] = Array.from(speakerSet).map(id => ({
+    const speakerSet = new Set(chronologicalUtterances.map((u) => u.speaker));
+    const speakers: SpeakerInfo[] = Array.from(speakerSet).map((id) => ({
       id,
-      totalSpeakingTime: chronologicalUtterances.filter(u => u.speaker === id).reduce((sum, u) => sum + (u.end - u.start), 0),
-      utteranceCount: chronologicalUtterances.filter(u => u.speaker === id).length,
+      totalSpeakingTime: chronologicalUtterances
+        .filter((u) => u.speaker === id)
+        .reduce((sum, u) => sum + (u.end - u.start), 0),
+      utteranceCount: chronologicalUtterances.filter((u) => u.speaker === id).length,
       averageConfidence: 1,
     }));
 
-    const finalUtterances: Utterance[] = chronologicalUtterances.map(u => ({
+    const finalUtterances: Utterance[] = chronologicalUtterances.map((u) => ({
       id: u.id,
       speaker: u.speaker,
       text: u.text,
@@ -474,12 +490,12 @@ export function LiveRecorder({
     }));
 
     const languageCounts: Record<string, number> = {};
-    chronologicalUtterances.forEach(u => {
+    chronologicalUtterances.forEach((u) => {
       const lang = u.language || 'en';
       languageCounts[lang] = (languageCounts[lang] || 0) + 1;
     });
-    const primaryLanguage = Object.entries(languageCounts)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'en';
+    const primaryLanguage =
+      Object.entries(languageCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'en';
 
     const result: TranscriptionResult = {
       transcript: allText,
@@ -500,7 +516,13 @@ export function LiveRecorder({
     };
 
     onRecordingComplete(result);
-  }, [utterances, detectedLanguages, settings.transcriptionProvider, onRecordingComplete, onRecordingCancelled]);
+  }, [
+    utterances,
+    detectedLanguages,
+    settings.transcriptionProvider,
+    onRecordingComplete,
+    onRecordingCancelled,
+  ]);
 
   const cancelSession = useCallback(() => {
     // Clean up any initialized resources (from countdown)
@@ -509,7 +531,7 @@ export function LiveRecorder({
       socketRef.current = null;
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (audioContextRef.current) {
@@ -575,7 +597,15 @@ export function LiveRecorder({
 
     window.addEventListener('toggle-recording', handleHotkey);
     return () => window.removeEventListener('toggle-recording', handleHotkey);
-  }, [isRecording, countdown, isProcessing, hasRequiredKeys, startWithCountdown, stopRecording, cancelSession]);
+  }, [
+    isRecording,
+    countdown,
+    isProcessing,
+    hasRequiredKeys,
+    startWithCountdown,
+    stopRecording,
+    cancelSession,
+  ]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -591,7 +621,7 @@ export function LiveRecorder({
       <div className="flex flex-col items-center">
         {/* API Key Warning */}
         {!hasRequiredKeys && (
-          <div className="mb-6 w-full max-w-md animate-fade-in-up">
+          <div className="animate-fade-in-up mb-6 w-full max-w-md">
             <div className="rounded-2xl border border-[hsl(var(--warning))]/30 bg-[hsl(var(--warning))]/5 p-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--warning))]/10">
@@ -620,10 +650,14 @@ export function LiveRecorder({
 
         {/* New Recording Card */}
         <div
-          onClick={hasRequiredKeys ? () => {
-            setIsSessionActive(true);
-            startWithCountdown();
-          } : undefined}
+          onClick={
+            hasRequiredKeys
+              ? () => {
+                  setIsSessionActive(true);
+                  startWithCountdown();
+                }
+              : undefined
+          }
           className={cn(
             'group relative w-full max-w-md rounded-3xl border-2 border-dashed p-8 text-center transition-all duration-300',
             hasRequiredKeys
@@ -632,16 +666,20 @@ export function LiveRecorder({
           )}
         >
           {/* Mic Icon */}
-          <div className={cn(
-            'mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl transition-all duration-300',
-            hasRequiredKeys
-              ? 'bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110'
-              : 'bg-muted'
-          )}>
-            <Plus className={cn(
-              'h-8 w-8 transition-colors',
-              hasRequiredKeys ? 'text-primary' : 'text-muted-foreground'
-            )} />
+          <div
+            className={cn(
+              'mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl transition-all duration-300',
+              hasRequiredKeys
+                ? 'bg-primary/10 group-hover:scale-110 group-hover:bg-primary/20'
+                : 'bg-muted'
+            )}
+          >
+            <Plus
+              className={cn(
+                'h-8 w-8 transition-colors',
+                hasRequiredKeys ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
           </div>
 
           <h3 className="text-lg font-semibold">New Recording</h3>
@@ -651,8 +689,12 @@ export function LiveRecorder({
 
           {/* Keyboard shortcut hint */}
           <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground/70">
-            <span className="rounded bg-muted px-1.5 py-0.5 mono text-[10px]">
-              {typeof navigator !== 'undefined' && navigator.platform?.toUpperCase().indexOf('MAC') >= 0 ? '⌘' : 'Ctrl'}+Shift+R
+            <span className="mono rounded bg-muted px-1.5 py-0.5 text-[10px]">
+              {typeof navigator !== 'undefined' &&
+              navigator.platform?.toUpperCase().indexOf('MAC') >= 0
+                ? '⌘'
+                : 'Ctrl'}
+              +Shift+R
             </span>
             <span>for quick start</span>
           </div>
@@ -664,13 +706,13 @@ export function LiveRecorder({
   // ===== STATE 2: Session active, ready to record (or counting down) =====
   if (isSessionActive && !isRecording && !isProcessing) {
     return (
-      <div className="flex flex-col items-center animate-scale-in">
+      <div className="animate-scale-in flex flex-col items-center">
         {/* Ready to Record Panel */}
-        <div className="relative w-full max-w-md rounded-3xl border bg-card p-8 shadow-soft-lg">
+        <div className="shadow-soft-lg relative w-full max-w-md rounded-3xl border bg-card p-8">
           {/* Close button */}
           <button
             onClick={cancelSession}
-            className="absolute right-4 top-4 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="absolute right-4 top-4 rounded-xl p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -679,7 +721,7 @@ export function LiveRecorder({
             {/* Record button or Countdown */}
             {countdown !== null ? (
               /* Countdown display */
-              <div className="h-24 w-24 mb-6 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+              <div className="mb-6 flex h-24 w-24 animate-pulse items-center justify-center rounded-full bg-primary/10">
                 <span className="text-5xl font-bold text-primary">{countdown}</span>
               </div>
             ) : (
@@ -687,7 +729,7 @@ export function LiveRecorder({
                 onClick={startWithCountdown}
                 disabled={isDisabled}
                 className={cn(
-                  'btn-record h-24 w-24 mb-6',
+                  'btn-record mb-6 h-24 w-24',
                   isDisabled && 'cursor-not-allowed opacity-50'
                 )}
               >
@@ -698,11 +740,10 @@ export function LiveRecorder({
             <h3 className="text-xl font-semibold">
               {countdown !== null ? 'Get ready...' : 'Ready to record'}
             </h3>
-            <p className="mt-2 text-sm text-muted-foreground text-center">
+            <p className="mt-2 text-center text-sm text-muted-foreground">
               {countdown !== null
                 ? 'Recording will start in a moment'
-                : 'Click the button above or press Enter to start'
-              }
+                : 'Click the button above or press Enter to start'}
             </p>
           </div>
         </div>
@@ -718,28 +759,40 @@ export function LiveRecorder({
           {/* Processing animation */}
           <div className="relative mb-8">
             {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full border-4 border-primary/20" style={{ width: 120, height: 120 }} />
+            <div
+              className="absolute inset-0 rounded-full border-4 border-primary/20"
+              style={{ width: 120, height: 120 }}
+            />
             {/* Spinning ring */}
             <div
-              className="rounded-full border-4 border-transparent border-t-primary animate-spin"
+              className="animate-spin rounded-full border-4 border-transparent border-t-primary"
               style={{ width: 120, height: 120 }}
             />
             {/* Center icon */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+              <Sparkles className="h-10 w-10 animate-pulse text-primary" />
             </div>
           </div>
 
-          <h3 className="text-xl font-semibold mb-2">Processing your recording</h3>
-          <p className="text-muted-foreground text-center max-w-sm">
+          <h3 className="mb-2 text-xl font-semibold">Processing your recording</h3>
+          <p className="max-w-sm text-center text-muted-foreground">
             Saving transcription and generating insights...
           </p>
 
           {/* Progress dots */}
-          <div className="flex gap-1.5 mt-6">
-            <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="mt-6 flex gap-1.5">
+            <div
+              className="h-2 w-2 animate-bounce rounded-full bg-primary"
+              style={{ animationDelay: '0ms' }}
+            />
+            <div
+              className="h-2 w-2 animate-bounce rounded-full bg-primary"
+              style={{ animationDelay: '150ms' }}
+            />
+            <div
+              className="h-2 w-2 animate-bounce rounded-full bg-primary"
+              style={{ animationDelay: '300ms' }}
+            />
           </div>
         </div>
       </div>
@@ -750,16 +803,14 @@ export function LiveRecorder({
   return (
     <div className="animate-fade-in">
       {/* Recording Panel */}
-      <div className="rounded-3xl border bg-card shadow-soft-lg overflow-hidden">
+      <div className="shadow-soft-lg overflow-hidden rounded-3xl border bg-card">
         {/* Header with controls */}
-        <div className="flex items-center justify-between p-4 border-b bg-muted/30">
+        <div className="flex items-center justify-between border-b bg-muted/30 p-4">
           <div className="flex items-center gap-3">
             {/* Recording indicator */}
-            <div className="flex items-center gap-2 rounded-full px-3 py-1.5 bg-destructive/10">
+            <div className="flex items-center gap-2 rounded-full bg-destructive/10 px-3 py-1.5">
               <div className="status-dot status-dot-recording" />
-              <span className="text-sm font-medium mono">
-                {formatDuration(recordingDuration)}
-              </span>
+              <span className="mono text-sm font-medium">{formatDuration(recordingDuration)}</span>
             </div>
 
             {/* Stats */}
@@ -773,22 +824,23 @@ export function LiveRecorder({
             {detectedLanguages.size > 0 && (
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4" />
-                <span>{Array.from(detectedLanguages).map(l => l.toUpperCase()).join(', ')}</span>
+                <span>
+                  {Array.from(detectedLanguages)
+                    .map((l) => l.toUpperCase())
+                    .join(', ')}
+                </span>
               </div>
             )}
           </div>
 
           {/* Stop button */}
-          <button
-            onClick={stopRecording}
-            className="btn-record btn-record-stop h-10 w-10"
-          >
+          <button onClick={stopRecording} className="btn-record btn-record-stop h-10 w-10">
             <Square className="h-4 w-4" />
           </button>
         </div>
 
         {/* Audio Visualizer */}
-        <div className="px-6 py-4 border-b bg-gradient-to-b from-primary/5 to-transparent">
+        <div className="border-b bg-gradient-to-b from-primary/5 to-transparent px-6 py-4">
           <WaveformVisualizer level={audioLevel} />
         </div>
 
@@ -799,21 +851,21 @@ export function LiveRecorder({
               <div className="empty-state-icon">
                 <Mic className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="text-muted-foreground">
-                Listening... Start speaking
-              </p>
+              <p className="text-muted-foreground">Listening... Start speaking</p>
             </div>
           ) : (
             <div className="space-y-3">
               {/* Interim text - shown at top since newest content is first */}
               {interimText && (
                 <div className="transcript-segment opacity-50">
-                  <div className={cn(
-                    'shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium',
-                    interimSpeaker !== null
-                      ? `speaker-badge-${interimSpeaker % 6}`
-                      : 'bg-muted text-muted-foreground'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium',
+                      interimSpeaker !== null
+                        ? `speaker-badge-${interimSpeaker % 6}`
+                        : 'bg-muted text-muted-foreground'
+                    )}
+                  >
                     {interimSpeaker !== null ? `S${interimSpeaker + 1}` : '...'}
                   </div>
                   <p className="text-sm italic text-muted-foreground">{interimText}</p>
@@ -833,24 +885,28 @@ export function LiveRecorder({
 
 // Transcript segment component
 function TranscriptSegment({ utterance }: { utterance: LiveUtterance }) {
-  const langName = utterance.language ? LANGUAGE_NAMES[utterance.language] || utterance.language.toUpperCase() : null;
+  const langName = utterance.language
+    ? LANGUAGE_NAMES[utterance.language] || utterance.language.toUpperCase()
+    : null;
   const speakerIndex = utterance.speaker % 6;
 
   return (
     <div className="transcript-segment">
-      <div className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium speaker-badge-${speakerIndex}`}>
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium speaker-badge-${speakerIndex}`}
+      >
         S{utterance.speaker + 1}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
           <span className={`text-xs font-medium speaker-text-${speakerIndex}`}>
             Speaker {utterance.speaker + 1}
           </span>
-          <span className="text-xs text-muted-foreground mono">
+          <span className="mono text-xs text-muted-foreground">
             {formatTimestamp(utterance.start)}
           </span>
           {langName && (
-            <span className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+            <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
               {langName}
             </span>
           )}
@@ -869,13 +925,13 @@ function WaveformVisualizer({ level }: { level: number }) {
   // Animate the waveform at 30fps
   useEffect(() => {
     const interval = setInterval(() => {
-      setTick(t => t + 1);
+      setTick((t) => t + 1);
     }, 33);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex items-center justify-center gap-[3px] h-16">
+    <div className="flex h-16 items-center justify-center gap-[3px]">
       {Array.from({ length: bars }).map((_, i) => {
         // Create organic wave pattern
         const centerDistance = Math.abs(i - bars / 2) / (bars / 2);
@@ -904,4 +960,3 @@ function WaveformVisualizer({ level }: { level: number }) {
     </div>
   );
 }
-

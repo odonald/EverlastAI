@@ -48,7 +48,7 @@ export function TranscriptionSettings() {
     updateSettings({ transcriptionProvider: provider });
   };
 
-  const canSelectProvider = (provider: typeof PROVIDERS[number]) => {
+  const canSelectProvider = (provider: (typeof PROVIDERS)[number]) => {
     if (provider.isLocal) return true;
     if (provider.id === 'deepgram') return !!settings.apiKeys.deepgram;
     if (provider.id === 'elevenlabs') return !!settings.apiKeys.elevenlabs;
@@ -59,9 +59,7 @@ export function TranscriptionSettings() {
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold">Transcription</h3>
-        <p className="mt-1 text-muted-foreground">
-          Choose your preferred speech-to-text provider.
-        </p>
+        <p className="mt-1 text-muted-foreground">Choose your preferred speech-to-text provider.</p>
       </div>
 
       <div className="space-y-3">
@@ -76,16 +74,21 @@ export function TranscriptionSettings() {
               onClick={() => canSelect && handleProviderChange(provider.id)}
               disabled={!canSelect}
               className={cn(
-                'w-full rounded-2xl border p-5 text-left transition-all duration-300 animate-fade-in-up',
+                'animate-fade-in-up w-full rounded-2xl border p-5 text-left transition-all duration-300',
                 isSelected
-                  ? 'border-primary bg-primary/5 shadow-soft ring-2 ring-primary/30'
-                  : 'border-border hover:border-primary/30 hover:shadow-soft',
+                  ? 'shadow-soft border-primary bg-primary/5 ring-2 ring-primary/30'
+                  : 'hover:shadow-soft border-border hover:border-primary/30',
                 !canSelect && 'cursor-not-allowed opacity-50'
               )}
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex items-start gap-4">
-                <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl', provider.bgColor)}>
+                <div
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-xl',
+                    provider.bgColor
+                  )}
+                >
                   <Icon className={cn('h-6 w-6', provider.color)} />
                 </div>
 
@@ -126,9 +129,7 @@ export function TranscriptionSettings() {
                 <div
                   className={cn(
                     'flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all',
-                    isSelected
-                      ? 'border-primary bg-primary'
-                      : 'border-muted-foreground/30'
+                    isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
                   )}
                 >
                   {isSelected && <Check className="h-3.5 w-3.5 text-primary-foreground" />}
@@ -141,7 +142,7 @@ export function TranscriptionSettings() {
 
       {/* Whisper endpoint configuration */}
       {settings.transcriptionProvider === 'whisper' && (
-        <div className="space-y-4 rounded-2xl border bg-gradient-to-r from-green-500/5 to-transparent p-5 animate-scale-in">
+        <div className="animate-scale-in space-y-4 rounded-2xl border bg-gradient-to-r from-green-500/5 to-transparent p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
               <Server className="h-5 w-5 text-green-500" />
@@ -159,7 +160,7 @@ export function TranscriptionSettings() {
             className={cn(
               'w-full rounded-xl border bg-background px-4 py-3 text-sm',
               'placeholder:text-muted-foreground/50',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary',
+              'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
               'transition-all duration-200'
             )}
           />
@@ -172,11 +173,7 @@ export function TranscriptionSettings() {
       )}
 
       <div className="flex justify-end pt-2">
-        <Button
-          onClick={saveSettings}
-          disabled={isSaving}
-          className="rounded-xl px-6"
-        >
+        <Button onClick={saveSettings} disabled={isSaving} className="rounded-xl px-6">
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>

@@ -32,7 +32,12 @@ export function UserProfile({ onOpenSettings }: UserProfileProps) {
   };
 
   const initials = user.name
-    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
     : user.email.slice(0, 2).toUpperCase();
 
   const themeOptions = [
@@ -60,16 +65,15 @@ export function UserProfile({ onOpenSettings }: UserProfileProps) {
             {initials}
           </div>
         )}
-        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
 
           {/* Dropdown */}
           <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-lg border bg-popover p-2 shadow-lg">
@@ -89,9 +93,7 @@ export function UserProfile({ onOpenSettings }: UserProfileProps) {
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                {user.name && (
-                  <p className="truncate text-sm font-medium">{user.name}</p>
-                )}
+                {user.name && <p className="truncate text-sm font-medium">{user.name}</p>}
                 <p className="truncate text-xs text-muted-foreground">{user.email}</p>
               </div>
             </div>

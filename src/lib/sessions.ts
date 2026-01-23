@@ -3,7 +3,11 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { TranscriptionResult, TranscriptionSession, SessionEnrichment } from '@/types/transcription';
+import {
+  TranscriptionResult,
+  TranscriptionSession,
+  SessionEnrichment,
+} from '@/types/transcription';
 
 export interface SessionListItem {
   id: string;
@@ -48,10 +52,7 @@ export async function listSessions(userId?: string): Promise<SessionListItem[]> 
 /**
  * Save a new session or update existing
  */
-export async function saveSession(
-  session: FullSession,
-  userId?: string
-): Promise<void> {
+export async function saveSession(session: FullSession, userId?: string): Promise<void> {
   try {
     const listItem: SessionListItem = {
       id: session.id,
@@ -80,10 +81,7 @@ export async function saveSession(
 /**
  * Get a full session by ID
  */
-export async function getSession(
-  sessionId: string,
-  userId?: string
-): Promise<FullSession> {
+export async function getSession(sessionId: string, userId?: string): Promise<FullSession> {
   try {
     const sessionData = await invoke<string>('get_session', {
       userId: userId || null,
@@ -99,10 +97,7 @@ export async function getSession(
 /**
  * Delete a session
  */
-export async function deleteSession(
-  sessionId: string,
-  userId?: string
-): Promise<void> {
+export async function deleteSession(sessionId: string, userId?: string): Promise<void> {
   try {
     await invoke('delete_session', {
       userId: userId || null,
@@ -217,7 +212,7 @@ export async function deleteEnrichmentFromSession(
 ): Promise<void> {
   const session = await getSession(sessionId, userId);
 
-  session.enrichments = (session.enrichments || []).filter(e => e.id !== enrichmentId);
+  session.enrichments = (session.enrichments || []).filter((e) => e.id !== enrichmentId);
   session.updatedAt = new Date().toISOString();
 
   await saveSession(session, userId);
@@ -235,7 +230,7 @@ export async function updateSpeakerName(
   const session = await getSession(sessionId, userId);
 
   // Find the speaker and update their label
-  const speaker = session.transcription.speakers.find(s => s.id === speakerId);
+  const speaker = session.transcription.speakers.find((s) => s.id === speakerId);
   if (speaker) {
     speaker.label = name.trim() || undefined; // Clear if empty
   }
@@ -244,4 +239,3 @@ export async function updateSpeakerName(
   await saveSession(session, userId);
   return session;
 }
-

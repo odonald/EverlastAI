@@ -32,14 +32,14 @@ export interface Utterance {
   id: string;
   speaker: number;
   text: string;
-  start: number;  // seconds
-  end: number;    // seconds
+  start: number; // seconds
+  end: number; // seconds
   confidence?: number;
   words?: Word[];
   sentiment?: 'positive' | 'negative' | 'neutral';
   sentimentScore?: number;
-  language?: string;  // Detected language for this utterance
-  isFinal?: boolean;  // Whether this is a final transcription
+  language?: string; // Detected language for this utterance
+  isFinal?: boolean; // Whether this is a final transcription
 }
 
 export interface Word {
@@ -53,7 +53,7 @@ export interface Word {
 
 export interface SpeakerInfo {
   id: number;
-  label?: string;  // User can rename: "Speaker 0" -> "John"
+  label?: string; // User can rename: "Speaker 0" -> "John"
   totalSpeakingTime: number;
   utteranceCount: number;
   averageConfidence: number;
@@ -104,7 +104,7 @@ export type EntityType =
 export interface TranscriptionMetadata {
   id: string;
   createdAt: Date;
-  duration: number;      // seconds
+  duration: number; // seconds
   wordCount: number;
   speakerCount: number;
   provider: 'deepgram' | 'elevenlabs' | 'whisper';
@@ -124,12 +124,12 @@ export interface TranscriptionOptions {
   model?: 'nova-3' | 'nova-2' | 'nova' | 'enhanced' | 'base';
 
   // Feature toggles
-  diarize?: boolean;           // Speaker identification
-  detectLanguage?: boolean;    // Auto language detection
-  multilingual?: boolean;      // Code-switching support
-  smartFormat?: boolean;       // Punctuation + formatting
-  utterances?: boolean;        // Segment by utterances
-  paragraphs?: boolean;        // Paragraph formatting
+  diarize?: boolean; // Speaker identification
+  detectLanguage?: boolean; // Auto language detection
+  multilingual?: boolean; // Code-switching support
+  smartFormat?: boolean; // Punctuation + formatting
+  utterances?: boolean; // Segment by utterances
+  paragraphs?: boolean; // Paragraph formatting
 
   // Intelligence features (Deepgram)
   summarize?: boolean;
@@ -139,10 +139,10 @@ export interface TranscriptionOptions {
   detectEntities?: boolean;
 
   // Language settings
-  language?: string;           // BCP-47 code or 'multi'
+  language?: string; // BCP-47 code or 'multi'
 
   // Custom vocabulary
-  keywords?: string[];         // Boost recognition of specific terms
+  keywords?: string[]; // Boost recognition of specific terms
 }
 
 // Default options for best results
@@ -182,11 +182,19 @@ export interface TranscriptionSession {
 
 export interface SessionEnrichment {
   id: string;
-  type: 'summary' | 'notes' | 'action-items' | 'insights' | 'translate' | 'format' | 'cleanup' | 'custom';
+  type:
+    | 'summary'
+    | 'notes'
+    | 'action-items'
+    | 'insights'
+    | 'translate'
+    | 'format'
+    | 'cleanup'
+    | 'custom';
   content: string;
   createdAt: Date;
-  provider: string;  // Which LLM was used
-  targetLanguage?: string;  // For translate type
+  provider: string; // Which LLM was used
+  targetLanguage?: string; // For translate type
 }
 
 export interface SessionListItem {
@@ -196,7 +204,7 @@ export interface SessionListItem {
   duration: number;
   speakerCount: number;
   wordCount: number;
-  preview: string;  // First 100 chars
+  preview: string; // First 100 chars
   tags?: string[];
   starred?: boolean;
 }

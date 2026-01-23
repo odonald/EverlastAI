@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       found: true,
-      tokenData: sessionData.tokenData
+      tokenData: sessionData.tokenData,
     });
   } catch (error) {
     console.error('Failed to retrieve Notion session:', error);

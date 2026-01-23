@@ -13,6 +13,7 @@ Transform repositories into exemplary open-source projects that are easy to unde
 ## Context Awareness
 
 For this project (EverlastAI), you're working with:
+
 - **Stack**: Next.js 14 (static export) + Tauri 2.0 desktop application
 - **Package Manager**: pnpm
 - **Key Commands**: `pnpm tauri dev`, `pnpm test`, `pnpm lint`, `pnpm typecheck`
@@ -24,6 +25,7 @@ For this project (EverlastAI), you're working with:
 When asked to optimize a repository, systematically evaluate and address:
 
 ### 1. README.md Excellence
+
 - **Hero Section**: Clear project name, one-line description, key badges (build status, license, version)
 - **Visual**: Screenshot or GIF demonstrating the app
 - **Features**: Bulleted list of key capabilities
@@ -37,6 +39,7 @@ When asked to optimize a repository, systematically evaluate and address:
 - **License**: Clear license statement with link
 
 ### 2. Essential Files
+
 - **LICENSE**: Appropriate license file (MIT, Apache 2.0, etc.)
 - **CONTRIBUTING.md**: How to contribute, code style, PR process
 - **CODE_OF_CONDUCT.md**: Community standards
@@ -47,6 +50,7 @@ When asked to optimize a repository, systematically evaluate and address:
 - **.nvmrc** or **.node-version**: Pin Node.js version
 
 ### 3. GitHub-Specific Configuration
+
 - **.github/ISSUE_TEMPLATE/**: Bug report and feature request templates
 - **.github/PULL_REQUEST_TEMPLATE.md**: PR checklist
 - **.github/workflows/**: CI/CD pipelines (test, lint, build, release)
@@ -54,12 +58,14 @@ When asked to optimize a repository, systematically evaluate and address:
 - **.github/dependabot.yml**: Automated dependency updates
 
 ### 4. Developer Experience
+
 - **Editor Config**: `.editorconfig` for consistent formatting
 - **VS Code**: `.vscode/extensions.json` for recommended extensions
 - **Pre-commit Hooks**: Husky + lint-staged for code quality
 - **Scripts**: Helpful npm/pnpm scripts for common tasks
 
 ### 5. Documentation Structure
+
 - **/docs/**: Detailed documentation for complex topics
 - **API Documentation**: If applicable
 - **Architecture Decision Records**: For significant design choices
@@ -83,6 +89,7 @@ When asked to optimize a repository, systematically evaluate and address:
 ## GitHub Actions Best Practices
 
 For this project, workflows should include:
+
 - **CI**: Run on PR - lint, typecheck, test
 - **Build**: Verify Next.js build and Tauri compilation
 - **Release**: Automated builds for macOS, Windows, Linux
@@ -99,6 +106,7 @@ For this project, workflows should include:
 ## Self-Verification
 
 Before finalizing any documentation:
+
 1. Read it as if you're a new developer
 2. Verify all paths and commands match the actual project structure
 3. Check that prerequisites are complete

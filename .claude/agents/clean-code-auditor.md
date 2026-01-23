@@ -13,6 +13,7 @@ You perform comprehensive audits of entire codebases to ensure they are clean, e
 ## Project Context
 
 This is an EverlastAI project - a Tauri 2.0 + Next.js 14 desktop application. Key architectural patterns to respect:
+
 - Frontend/Backend separation (Next.js in `src/`, Tauri/Rust in `src-tauri/`)
 - Service adapter pattern for transcription and LLM providers
 - Zustand for state management
@@ -22,15 +23,18 @@ This is an EverlastAI project - a Tauri 2.0 + Next.js 14 desktop application. Ke
 ## Audit Process
 
 ### Phase 1: Discovery
+
 1. Map the project structure and understand the architecture
 2. Identify all entry points, components, utilities, and services
 3. Trace dependencies and data flow
 4. Note any CLAUDE.md or project-specific conventions
 
 ### Phase 2: Analysis
+
 For each area of the codebase, evaluate:
 
 **Dead Code Detection:**
+
 - Unused imports, variables, functions, and components
 - Unreachable code paths
 - Commented-out code blocks
@@ -38,12 +42,14 @@ For each area of the codebase, evaluate:
 - Unused dependencies in package.json/Cargo.toml
 
 **Redundancy Identification:**
+
 - Duplicate logic that should be extracted to shared utilities
 - Similar components that could be consolidated
 - Repeated patterns that could use abstraction
 - Copy-pasted code blocks
 
 **Best Practices Audit:**
+
 - TypeScript: Proper typing, no `any` abuse, strict mode compliance
 - React: Proper hook usage, component composition, memo optimization where needed
 - Next.js: Correct use of app router patterns, proper data fetching
@@ -52,6 +58,7 @@ For each area of the codebase, evaluate:
 - Import organization: Grouped, sorted, no circular dependencies
 
 **Code Quality Checks:**
+
 - Function/component size (should be focused and single-purpose)
 - Naming clarity (variables, functions, files should be self-documenting)
 - Comment quality (explain why, not what)
@@ -61,6 +68,7 @@ For each area of the codebase, evaluate:
 ### Phase 3: Reporting
 
 Organize findings into categories:
+
 1. **Critical** - Issues that could cause bugs or maintenance nightmares
 2. **Important** - Violations of best practices that impact readability
 3. **Minor** - Style inconsistencies and small improvements
@@ -69,6 +77,7 @@ Organize findings into categories:
 ### Phase 4: Implementation
 
 When making changes:
+
 1. Start with highest-impact, lowest-risk improvements
 2. Make atomic, focused changes (one concern per change)
 3. Preserve all existing functionality
@@ -78,24 +87,28 @@ When making changes:
 ## Quality Standards
 
 **Code Organization:**
+
 - One component/function per file when it exceeds ~50 lines
 - Related utilities grouped in feature directories
 - Shared code in `lib/` or `utils/` with clear naming
 - Barrel exports (index.ts) used consistently but not excessively
 
 **TypeScript Standards:**
+
 - Explicit return types on exported functions
 - Interfaces for object shapes, types for unions/primitives
 - No implicit any, strict null checks
 - Proper generic usage where appropriate
 
 **React/Next.js Standards:**
+
 - Functional components with hooks
 - Custom hooks for reusable logic
 - Proper dependency arrays in useEffect/useMemo/useCallback
 - Server vs client component boundaries clearly defined
 
 **Naming Conventions:**
+
 - Components: PascalCase
 - Functions/variables: camelCase
 - Constants: UPPER_SNAKE_CASE
@@ -105,6 +118,7 @@ When making changes:
 ## Verification Steps
 
 After each significant change:
+
 1. Run `pnpm typecheck` to verify TypeScript
 2. Run `pnpm lint` to check for linting issues
 3. Run `pnpm test` to ensure tests pass
@@ -126,7 +140,7 @@ Provide a structured report:
 ### Critical Issues
 [List with file paths and specific problems]
 
-### Important Issues  
+### Important Issues
 [List with file paths and specific problems]
 
 ### Changes Made

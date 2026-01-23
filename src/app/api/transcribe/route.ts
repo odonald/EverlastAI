@@ -10,25 +10,16 @@ export async function POST(request: NextRequest) {
     const apiKey = formData.get('apiKey') as string;
 
     if (!audioFile) {
-      return NextResponse.json(
-        { error: 'Audio file is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Audio file is required' }, { status: 400 });
     }
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: 'API key is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'API key is required' }, { status: 400 });
     }
 
     const validProviders = ['deepgram', 'elevenlabs', 'whisper'];
     if (!validProviders.includes(provider)) {
-      return NextResponse.json(
-        { error: 'Invalid transcription provider' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid transcription provider' }, { status: 400 });
     }
 
     let text = '';
@@ -46,7 +37,7 @@ export async function POST(request: NextRequest) {
       const response = await fetch(`${DEEPGRAM_API_URL}?${params}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Token ${apiKey}`,
+          Authorization: `Token ${apiKey}`,
           'Content-Type': audioFile.type || 'audio/webm',
         },
         body: arrayBuffer,

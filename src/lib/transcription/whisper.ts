@@ -9,10 +9,7 @@
 
 const DEFAULT_WHISPER_ENDPOINT = 'http://localhost:8080';
 
-export async function transcribeWithWhisper(
-  audioBlob: Blob,
-  endpoint?: string
-): Promise<string> {
+export async function transcribeWithWhisper(audioBlob: Blob, endpoint?: string): Promise<string> {
   const baseUrl = endpoint || DEFAULT_WHISPER_ENDPOINT;
 
   // Convert blob to file for FormData
@@ -68,7 +65,7 @@ export async function transcribeWithWhisper(
 
   throw new Error(
     `Failed to connect to Whisper server at ${baseUrl}. ` +
-    'Make sure you have a local Whisper server running. ' +
-    'You can use: faster-whisper-server, whisper.cpp, or LocalAI.'
+      'Make sure you have a local Whisper server running. ' +
+      'You can use: faster-whisper-server, whisper.cpp, or LocalAI.'
   );
 }

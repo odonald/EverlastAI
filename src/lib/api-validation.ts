@@ -14,7 +14,7 @@ export interface ValidationResult {
 export async function validateDeepgramKey(apiKey: string): Promise<ValidationResult> {
   try {
     const response = await fetch('https://api.deepgram.com/v1/projects', {
-      headers: { 'Authorization': `Token ${apiKey}` },
+      headers: { Authorization: `Token ${apiKey}` },
     });
 
     if (response.ok) {
@@ -44,7 +44,7 @@ export async function validateDeepgramKey(apiKey: string): Promise<ValidationRes
 export async function validateOpenAIKey(apiKey: string): Promise<ValidationResult> {
   try {
     const response = await fetch('https://api.openai.com/v1/models', {
-      headers: { 'Authorization': `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     });
 
     if (response.ok) {
@@ -218,7 +218,13 @@ export async function validateWhisperEndpoint(endpoint: string): Promise<Validat
   }
 }
 
-export type ProviderType = 'deepgram' | 'openai' | 'anthropic' | 'elevenlabs' | 'ollama' | 'whisper';
+export type ProviderType =
+  | 'deepgram'
+  | 'openai'
+  | 'anthropic'
+  | 'elevenlabs'
+  | 'ollama'
+  | 'whisper';
 
 /**
  * Validate any provider's API key/endpoint

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Notion OAuth configuration
 const NOTION_CLIENT_ID = process.env.NOTION_CLIENT_ID;
-const NOTION_REDIRECT_URI = process.env.NOTION_REDIRECT_URI || 'http://localhost:3000/notion/callback';
+const NOTION_REDIRECT_URI =
+  process.env.NOTION_REDIRECT_URI || 'http://localhost:3000/notion/callback';
 
 // Use POST to avoid static export issues with searchParams
 export async function POST(request: NextRequest) {

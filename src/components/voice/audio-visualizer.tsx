@@ -31,11 +31,7 @@ export function AudioVisualizer({ level, isRecording }: AudioVisualizerProps) {
             key={i}
             className={cn(
               'w-1 rounded-full transition-all duration-100 sm:w-1.5',
-              isRecording
-                ? level > 0.1
-                  ? 'bg-green-500'
-                  : 'bg-primary'
-                : 'bg-muted'
+              isRecording ? (level > 0.1 ? 'bg-green-500' : 'bg-primary') : 'bg-muted'
             )}
             style={{ height: `${Math.max(baseHeight, height)}px` }}
           />

@@ -73,9 +73,10 @@ export async function transcribeEnhanced(
     case 'elevenlabs':
     case 'whisper': {
       // For non-Deepgram providers, get simple text and wrap in result
-      const text = provider === 'elevenlabs'
-        ? await transcribeWithElevenlabs(audioBlob, apiKeyOrEndpoint)
-        : await transcribeWithWhisper(audioBlob, apiKeyOrEndpoint);
+      const text =
+        provider === 'elevenlabs'
+          ? await transcribeWithElevenlabs(audioBlob, apiKeyOrEndpoint)
+          : await transcribeWithWhisper(audioBlob, apiKeyOrEndpoint);
 
       return createBasicResult(text, provider);
     }
@@ -89,10 +90,7 @@ export async function transcribeEnhanced(
  * Create a basic TranscriptionResult from simple text
  * Used for providers that don't support enhanced features
  */
-function createBasicResult(
-  text: string,
-  provider: TranscriptionProvider
-): TranscriptionResult {
+function createBasicResult(text: string, provider: TranscriptionProvider): TranscriptionResult {
   // Split text into sentences as pseudo-utterances
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
 
@@ -106,17 +104,19 @@ function createBasicResult(
     words: [],
   }));
 
-  const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = text.split(/\s+/).filter((w) => w.length > 0).length;
 
   return {
     transcript: text,
     utterances,
-    speakers: [{
-      id: 0,
-      totalSpeakingTime: 0,
-      utteranceCount: utterances.length,
-      averageConfidence: 1,
-    }],
+    speakers: [
+      {
+        id: 0,
+        totalSpeakingTime: 0,
+        utteranceCount: utterances.length,
+        averageConfidence: 1,
+      },
+    ],
     detectedLanguage: 'en',
     languageConfidence: 1,
     metadata: {

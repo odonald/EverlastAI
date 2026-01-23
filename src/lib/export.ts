@@ -1,7 +1,15 @@
 'use client';
 
 import { jsPDF } from 'jspdf';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
+import {
+  Document,
+  Packer,
+  Paragraph,
+  TextRun,
+  HeadingLevel,
+  AlignmentType,
+  BorderStyle,
+} from 'docx';
 import { saveAs } from 'file-saver';
 import { FullSession } from '@/lib/sessions';
 import { formatDuration, formatTimestamp } from '@/lib/utils';
@@ -18,23 +26,23 @@ interface PDFOptions {
   includeTabs?: string[]; // Array of tab IDs to include ('transcript' or enrichment IDs)
 }
 
-export async function exportToPDF(
-  session: FullSession,
-  options: PDFOptions = {}
-): Promise<void> {
-  const {
-    includeMetadata = true,
-    includeTabs,
-  } = options;
+export async function exportToPDF(session: FullSession, options: PDFOptions = {}): Promise<void> {
+  const { includeMetadata = true, includeTabs } = options;
 
   // If includeTabs is provided, use it to determine what to include
-  const includeTranscript = includeTabs ? includeTabs.includes('transcript') : (options.includeTranscript ?? true);
-  const includeSummary = includeTabs ? includeTabs.includes('transcript') : (options.includeSummary ?? true);
+  const includeTranscript = includeTabs
+    ? includeTabs.includes('transcript')
+    : (options.includeTranscript ?? true);
+  const includeSummary = includeTabs
+    ? includeTabs.includes('transcript')
+    : (options.includeSummary ?? true);
 
   // Filter enrichments based on includeTabs
   const enrichmentsToInclude = includeTabs
-    ? (session.enrichments || []).filter(e => includeTabs.includes(e.id))
-    : (options.includeEnrichments !== false ? (session.enrichments || []) : []);
+    ? (session.enrichments || []).filter((e) => includeTabs.includes(e.id))
+    : options.includeEnrichments !== false
+      ? session.enrichments || []
+      : [];
 
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -49,7 +57,12 @@ export async function exportToPDF(
   let yPosition = margin;
 
   // Helper functions
-  const addText = (text: string, fontSize: number, isBold = false, color: [number, number, number] = [30, 30, 30]) => {
+  const addText = (
+    text: string,
+    fontSize: number,
+    isBold = false,
+    color: [number, number, number] = [30, 30, 30]
+  ) => {
     doc.setFontSize(fontSize);
     doc.setFont('helvetica', isBold ? 'bold' : 'normal');
     doc.setTextColor(...color);
@@ -125,7 +138,7 @@ export async function exportToPDF(
     if (utterances.length > 0) {
       utterances.forEach((utterance) => {
         // Get speaker name (custom label or default)
-        const speaker = speakers.find(s => s.id === utterance.speaker);
+        const speaker = speakers.find((s) => s.id === utterance.speaker);
         const speakerName = speaker?.label || `Speaker ${utterance.speaker + 1}`;
         const actualTime = formatActualTime(session.createdAt, utterance.start);
 
@@ -185,15 +198,8 @@ interface EmailOptions {
   includeMetadata?: boolean;
 }
 
-export function exportToEmail(
-  session: FullSession,
-  options: EmailOptions = {}
-): void {
-  const {
-    includeTranscript = true,
-    includeSummary = true,
-    includeMetadata = true,
-  } = options;
+export function exportToEmail(session: FullSession, options: EmailOptions = {}): void {
+  const { includeTranscript = true, includeSummary = true, includeMetadata = true } = options;
 
   const { transcription } = session;
   const lines: string[] = [];
@@ -228,7 +234,7 @@ export function exportToEmail(
     if (transcription.utterances.length > 0) {
       transcription.utterances.forEach((u) => {
         // Get speaker name (custom label or default)
-        const speaker = transcription.speakers.find(s => s.id === u.speaker);
+        const speaker = transcription.speakers.find((s) => s.id === u.speaker);
         const speakerName = speaker?.label || `Speaker ${u.speaker + 1}`;
         const actualTime = formatActualTime(session.createdAt, u.start);
         lines.push(`[${actualTime}] ${speakerName}: ${u.text}`);
@@ -300,7 +306,7 @@ export async function exportToWebhook(
       name: s.label || `Speaker ${s.id + 1}`,
     })),
     utterances: transcription.utterances.map((u) => {
-      const speaker = transcription.speakers.find(s => s.id === u.speaker);
+      const speaker = transcription.speakers.find((s) => s.id === u.speaker);
       return {
         speaker: u.speaker,
         speaker_name: speaker?.label || `Speaker ${u.speaker + 1}`,
@@ -395,10 +401,7 @@ export async function exportToNotion(
 // Text Export (.txt)
 // ============================================================================
 
-export function exportToTxt(
-  session: FullSession,
-  cleanedTranscript?: string
-): void {
+export function exportToTxt(session: FullSession, cleanedTranscript?: string): void {
   const { transcription } = session;
   const lines: string[] = [];
 
@@ -440,7 +443,7 @@ export function exportToTxt(
     const sessionStart = new Date(session.createdAt);
 
     transcription.utterances.forEach((u) => {
-      const speaker = transcription.speakers.find(s => s.id === u.speaker);
+      const speaker = transcription.speakers.find((s) => s.id === u.speaker);
       const speakerName = speaker?.label || `Speaker ${u.speaker + 1}`;
       const actualTime = new Date(sessionStart.getTime() + u.start * 1000);
       const timeStr = actualTime.toLocaleTimeString();
@@ -475,16 +478,17 @@ export async function exportToDocx(
   cleanedTranscriptOrOptions?: string | DocxOptions
 ): Promise<void> {
   // Handle both old signature (string) and new signature (options object)
-  const options: DocxOptions = typeof cleanedTranscriptOrOptions === 'string'
-    ? { cleanedTranscript: cleanedTranscriptOrOptions }
-    : (cleanedTranscriptOrOptions || {});
+  const options: DocxOptions =
+    typeof cleanedTranscriptOrOptions === 'string'
+      ? { cleanedTranscript: cleanedTranscriptOrOptions }
+      : cleanedTranscriptOrOptions || {};
 
   const { cleanedTranscript, includeTabs } = options;
 
   // Filter enrichments based on includeTabs
   const enrichmentsToInclude = includeTabs
-    ? (session.enrichments || []).filter(e => includeTabs.includes(e.id))
-    : (session.enrichments || []);
+    ? (session.enrichments || []).filter((e) => includeTabs.includes(e.id))
+    : session.enrichments || [];
 
   const includeTranscript = includeTabs ? includeTabs.includes('transcript') : true;
   const { transcription } = session;
@@ -564,7 +568,7 @@ export async function exportToDocx(
 
     if (cleanedTranscript) {
       // Use cleaned transcript - split by newlines
-      const paragraphs = cleanedTranscript.split('\n').filter(p => p.trim());
+      const paragraphs = cleanedTranscript.split('\n').filter((p) => p.trim());
       paragraphs.forEach((para) => {
         children.push(
           new Paragraph({
@@ -576,7 +580,7 @@ export async function exportToDocx(
     } else if (transcription.utterances.length > 0) {
       // Regular transcript with timestamps
       transcription.utterances.forEach((u) => {
-        const speaker = transcription.speakers.find(s => s.id === u.speaker);
+        const speaker = transcription.speakers.find((s) => s.id === u.speaker);
         const speakerName = speaker?.label || `Speaker ${u.speaker + 1}`;
         const actualTime = new Date(sessionStart.getTime() + u.start * 1000);
         const timeStr = actualTime.toLocaleTimeString();
@@ -633,7 +637,7 @@ export async function exportToDocx(
         })
       );
 
-      const paragraphs = enrichment.content.split('\n').filter(p => p.trim());
+      const paragraphs = enrichment.content.split('\n').filter((p) => p.trim());
       paragraphs.forEach((para) => {
         children.push(
           new Paragraph({
@@ -695,7 +699,7 @@ function formatActualTime(sessionStart: string, offsetSeconds: number): string {
   return actualTime.toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 }
 

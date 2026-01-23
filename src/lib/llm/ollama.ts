@@ -48,7 +48,7 @@ export async function enrichWithOllama(
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error(
         `Cannot connect to Ollama at ${baseUrl}. ` +
-        'Make sure Ollama is running (ollama serve) and the model is pulled.'
+          'Make sure Ollama is running (ollama serve) and the model is pulled.'
       );
     }
     throw error;

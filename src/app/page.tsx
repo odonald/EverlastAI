@@ -102,13 +102,13 @@ export default function Home() {
 
   // Filter and sort sessions
   const filteredSessions = sessions
-    .filter(session => {
+    .filter((session) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = session.title.toLowerCase().includes(query);
         const matchesPreview = session.preview.toLowerCase().includes(query);
-        const matchesTags = session.tags?.some(tag => tag.toLowerCase().includes(query));
+        const matchesTags = session.tags?.some((tag) => tag.toLowerCase().includes(query));
         if (!matchesTitle && !matchesPreview && !matchesTags) return false;
       }
 
@@ -264,16 +264,18 @@ export default function Home() {
             console.error('Title generation failed, using fallback:', error);
             // Fallback to first sentence
             const firstSentence = transcription.transcript.split(/[.!?]/)[0];
-            title = firstSentence.length <= 50
-              ? firstSentence.trim()
-              : firstSentence.slice(0, 50).trim() + '...';
+            title =
+              firstSentence.length <= 50
+                ? firstSentence.trim()
+                : firstSentence.slice(0, 50).trim() + '...';
           }
         } else {
           // No LLM configured, use first sentence
           const firstSentence = transcription.transcript.split(/[.!?]/)[0];
-          title = firstSentence.length <= 50
-            ? firstSentence.trim()
-            : firstSentence.slice(0, 50).trim() + '...';
+          title =
+            firstSentence.length <= 50
+              ? firstSentence.trim()
+              : firstSentence.slice(0, 50).trim() + '...';
         }
       }
 
@@ -281,13 +283,15 @@ export default function Home() {
 
       // Add enrichment as a note
       if (enrichedContent !== transcription.transcript) {
-        session.enrichments = [{
-          id: crypto.randomUUID(),
-          type: 'notes',
-          content: enrichedContent,
-          createdAt: new Date(),
-          provider: settings.llmProvider,
-        }];
+        session.enrichments = [
+          {
+            id: crypto.randomUUID(),
+            type: 'notes',
+            content: enrichedContent,
+            createdAt: new Date(),
+            provider: settings.llmProvider,
+          },
+        ];
       }
 
       await saveSession(session, userId);
@@ -311,7 +315,7 @@ export default function Home() {
         setSelectedSession(null);
       }
       // Update locally instead of reloading to preserve scroll position
-      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch (error) {
       console.error('Failed to delete session:', error);
     }
@@ -321,18 +325,16 @@ export default function Home() {
     if (!userId) return;
 
     // Update locally first for immediate feedback and to preserve scroll position
-    setSessions(prev => prev.map(s =>
-      s.id === sessionId ? { ...s, starred } : s
-    ));
+    setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, starred } : s)));
 
     try {
       await updateSessionMetadata(sessionId, { starred }, userId);
     } catch (error) {
       console.error('Failed to update session:', error);
       // Revert on error
-      setSessions(prev => prev.map(s =>
-        s.id === sessionId ? { ...s, starred: !starred } : s
-      ));
+      setSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? { ...s, starred: !starred } : s))
+      );
     }
   };
 
@@ -355,9 +357,19 @@ export default function Home() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8 text-center">
         <div className="animate-scale-in">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[hsl(var(--success))]/10 shadow-soft">
-            <svg className="h-10 w-10 text-[hsl(var(--success))]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <div className="shadow-soft flex h-20 w-20 items-center justify-center rounded-3xl bg-[hsl(var(--success))]/10">
+            <svg
+              className="h-10 w-10 text-[hsl(var(--success))]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
         </div>
@@ -365,9 +377,10 @@ export default function Home() {
           <h2 className="text-2xl font-semibold">You&apos;re signed in!</h2>
           <p className="mt-2 text-muted-foreground">Authentication was successful.</p>
         </div>
-        <div className="animate-fade-in-up stagger-3 rounded-2xl border bg-card p-5 shadow-soft">
+        <div className="animate-fade-in-up stagger-3 shadow-soft rounded-2xl border bg-card p-5">
           <p className="text-sm text-card-foreground">
-            You can now close this tab and return to <strong className="text-primary">Everlast AI Recorder</strong>.
+            You can now close this tab and return to{' '}
+            <strong className="text-primary">Everlast AI Recorder</strong>.
           </p>
         </div>
       </main>
@@ -379,8 +392,8 @@ export default function Home() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-5">
         <div className="relative">
-          <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Mic className="h-8 w-8 text-primary animate-gentle-pulse" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <Mic className="animate-gentle-pulse h-8 w-8 text-primary" />
           </div>
         </div>
         <div className="text-center">
@@ -388,9 +401,9 @@ export default function Home() {
             {isProcessingCallback ? 'Completing sign in...' : 'Loading...'}
           </p>
           <div className="mt-4 flex items-center justify-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-            <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-            <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
           </div>
         </div>
       </main>
@@ -404,7 +417,7 @@ export default function Home() {
         {/* Minimal header */}
         <header className="flex shrink-0 items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-soft">
+            <div className="shadow-soft flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
               <Mic className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-lg font-semibold">Everlast AI Recorder</span>
@@ -416,7 +429,7 @@ export default function Home() {
         <div className="flex flex-1 flex-col items-center justify-center px-6 pb-8">
           <div className="max-w-lg text-center">
             {/* Icon */}
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 shadow-soft animate-float">
+            <div className="shadow-soft animate-float mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5">
               <Mic className="h-8 w-8 text-primary" />
             </div>
 
@@ -428,7 +441,8 @@ export default function Home() {
 
             {/* Subheadline */}
             <p className="mt-3 text-base text-muted-foreground">
-              Record, transcribe with speaker detection, and transform your recordings with AI-powered insights.
+              Record, transcribe with speaker detection, and transform your recordings with
+              AI-powered insights.
             </p>
 
             {/* Features */}
@@ -438,7 +452,13 @@ export default function Home() {
                 <span>AI Enrichment</span>
               </div>
               <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs">
-                <svg className="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="h-3.5 w-3.5 text-primary"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -447,7 +467,13 @@ export default function Home() {
                 <span>Speaker Detection</span>
               </div>
               <div className="flex items-center gap-1.5 rounded-full bg-muted/50 px-3 py-1.5 text-xs">
-                <svg className="h-3.5 w-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  className="h-3.5 w-3.5 text-primary"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
                   <path d="M2 12h20" />
@@ -469,10 +495,20 @@ export default function Home() {
   // Waiting for auth
   if (isWaitingForAuth) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center text-center p-8">
-        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 shadow-soft">
-          <svg className="h-10 w-10 animate-[spin_3s_linear_infinite] text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+      <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
+        <div className="shadow-soft mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10">
+          <svg
+            className="h-10 w-10 animate-[spin_3s_linear_infinite] text-primary"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+            />
           </svg>
         </div>
         <h2 className="text-2xl font-semibold">Continue in your browser</h2>
@@ -480,9 +516,9 @@ export default function Home() {
           A browser window has opened for you to sign in securely.
         </p>
         <div className="mt-8 flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-          <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-          <div className="h-2 w-2 rounded-full bg-primary animate-bounce" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+          <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
         </div>
       </main>
     );
@@ -507,7 +543,7 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden">
           <SessionDetail
             session={selectedSession}
             onUpdateTitle={handleUpdateTitle}
@@ -540,12 +576,12 @@ export default function Home() {
       {/* Header */}
       <header className="flex shrink-0 items-center justify-between border-b px-4 py-3 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-soft">
+          <div className="shadow-soft flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
             <Mic className="h-4 w-4 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-lg font-semibold leading-none">Everlast AI Recorder</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Voice to Text</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">Voice to Text</p>
           </div>
         </div>
 
@@ -553,7 +589,7 @@ export default function Home() {
           <HotkeyBadge />
           <button
             onClick={() => setSettingsOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <Settings className="h-4 w-4" />
           </button>
@@ -580,10 +616,10 @@ export default function Home() {
             <section className="animate-fade-in">
               {/* Header with title and controls */}
               <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-semibold">Your Recordings</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {filteredSessions.length === sessions.length
                         ? `${sessions.length} ${sessions.length === 1 ? 'recording' : 'recordings'}`
                         : `${filteredSessions.length} of ${sessions.length} recordings`}
@@ -593,8 +629,8 @@ export default function Home() {
                   {/* Sort toggle */}
                   {sessions.length > 0 && (
                     <button
-                      onClick={() => setSortOrder(s => s === 'newest' ? 'oldest' : 'newest')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => setSortOrder((s) => (s === 'newest' ? 'oldest' : 'newest'))}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     >
                       <ArrowUpDown className="h-4 w-4" />
                       {sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}
@@ -604,21 +640,21 @@ export default function Home() {
 
                 {/* Search and filter bar */}
                 {sessions.length > 0 && (
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     {/* Search input */}
                     <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search recordings..."
-                        className="w-full h-10 pl-9 pr-9 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        className="h-10 w-full rounded-xl border bg-background pl-9 pr-9 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                       {searchQuery && (
                         <button
                           onClick={() => setSearchQuery('')}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 hover:bg-muted"
                         >
                           <X className="h-4 w-4 text-muted-foreground" />
                         </button>
@@ -629,12 +665,12 @@ export default function Home() {
                     <div className="flex gap-2">
                       {/* Starred filter */}
                       <button
-                        onClick={() => setShowStarredOnly(s => !s)}
+                        onClick={() => setShowStarredOnly((s) => !s)}
                         className={cn(
-                          'flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm transition-colors',
+                          'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm transition-colors',
                           showStarredOnly
-                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
-                            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                            ? 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                         )}
                       >
                         <Star className={cn('h-4 w-4', showStarredOnly && 'fill-current')} />
@@ -643,12 +679,12 @@ export default function Home() {
 
                       {/* More filters */}
                       <button
-                        onClick={() => setShowFilters(f => !f)}
+                        onClick={() => setShowFilters((f) => !f)}
                         className={cn(
-                          'flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm transition-colors',
+                          'flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm transition-colors',
                           showFilters || dateFilter !== 'all'
-                            ? 'bg-primary/10 border-primary/30 text-primary'
-                            : 'hover:bg-muted text-muted-foreground hover:text-foreground'
+                            ? 'border-primary/30 bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                         )}
                       >
                         <SlidersHorizontal className="h-4 w-4" />
@@ -660,21 +696,27 @@ export default function Home() {
 
                 {/* Expanded filters */}
                 {showFilters && sessions.length > 0 && (
-                  <div className="mt-3 p-3 rounded-xl border bg-muted/30 animate-fade-in">
+                  <div className="animate-fade-in mt-3 rounded-xl border bg-muted/30 p-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-medium text-muted-foreground mr-2">Date:</span>
+                      <span className="mr-2 text-xs font-medium text-muted-foreground">Date:</span>
                       {(['all', 'today', 'week', 'month'] as const).map((filter) => (
                         <button
                           key={filter}
                           onClick={() => setDateFilter(filter)}
                           className={cn(
-                            'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                            'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
                             dateFilter === filter
                               ? 'bg-primary text-primary-foreground'
-                              : 'bg-background border hover:bg-muted'
+                              : 'border bg-background hover:bg-muted'
                           )}
                         >
-                          {filter === 'all' ? 'All time' : filter === 'today' ? 'Today' : filter === 'week' ? 'This week' : 'This month'}
+                          {filter === 'all'
+                            ? 'All time'
+                            : filter === 'today'
+                              ? 'Today'
+                              : filter === 'week'
+                                ? 'This week'
+                                : 'This month'}
                         </button>
                       ))}
 
@@ -730,7 +772,7 @@ function HotkeyBadge() {
   }, []);
 
   return (
-    <div className="hidden md:flex items-center gap-1.5 rounded-lg bg-muted/50 px-2.5 py-1.5 text-xs text-muted-foreground">
+    <div className="hidden items-center gap-1.5 rounded-lg bg-muted/50 px-2.5 py-1.5 text-xs text-muted-foreground md:flex">
       <Keyboard className="h-3.5 w-3.5" />
       <span className="mono">{isMac ? '⌘' : 'Ctrl'}+Shift+R</span>
     </div>

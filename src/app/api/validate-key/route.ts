@@ -5,10 +5,7 @@ export async function POST(request: NextRequest) {
     const { provider, key } = await request.json();
 
     if (!provider || !key) {
-      return NextResponse.json(
-        { valid: false, error: 'Missing provider or key' },
-        { status: 400 }
-      );
+      return NextResponse.json({ valid: false, error: 'Missing provider or key' }, { status: 400 });
     }
 
     let result: { valid: boolean; error?: string; info?: Record<string, unknown> };
@@ -27,26 +24,20 @@ export async function POST(request: NextRequest) {
         result = await validateElevenLabs(key);
         break;
       default:
-        return NextResponse.json(
-          { valid: false, error: 'Unknown provider' },
-          { status: 400 }
-        );
+        return NextResponse.json({ valid: false, error: 'Unknown provider' }, { status: 400 });
     }
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Validation error:', error);
-    return NextResponse.json(
-      { valid: false, error: 'Validation request failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ valid: false, error: 'Validation request failed' }, { status: 500 });
   }
 }
 
 async function validateDeepgram(apiKey: string) {
   try {
     const response = await fetch('https://api.deepgram.com/v1/projects', {
-      headers: { 'Authorization': `Token ${apiKey}` },
+      headers: { Authorization: `Token ${apiKey}` },
     });
 
     if (response.ok) {
@@ -73,7 +64,7 @@ async function validateDeepgram(apiKey: string) {
 async function validateOpenAI(apiKey: string) {
   try {
     const response = await fetch('https://api.openai.com/v1/models', {
-      headers: { 'Authorization': `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
     });
 
     if (response.ok) {

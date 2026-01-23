@@ -94,8 +94,14 @@
   }
 
   html {
-    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    font-feature-settings: 'ss01' on, 'ss02' on;
+    font-family:
+      'DM Sans',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-feature-settings:
+      'ss01' on,
+      'ss02' on;
   }
 
   body {
@@ -103,13 +109,19 @@
   }
 
   /* Headings use DM Sans with tighter tracking */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'DM Sans', system-ui, sans-serif;
     @apply tracking-tight;
   }
 
   /* Monospace for code and timestamps */
-  code, .mono {
+  code,
+  .mono {
     font-family: 'JetBrains Mono', ui-monospace, monospace;
   }
 }
@@ -125,15 +137,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-border hover:bg-muted-foreground/30 transition-colors;
+  @apply rounded-full bg-border transition-colors hover:bg-muted-foreground/30;
 }
 
 /* ===== ANIMATIONS ===== */
 
 /* Smooth fade in */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Fade in with upward motion */
@@ -162,7 +178,8 @@
 
 /* Gentle pulse for recording indicator */
 @keyframes gentle-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -186,20 +203,34 @@
 
 /* Soundwave bars */
 @keyframes soundwave {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
 }
 
 /* Gradient shimmer for loading states */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* Float animation */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 /* Slide in from right */
@@ -272,26 +303,56 @@
 }
 
 /* Stagger delays */
-.stagger-1 { animation-delay: 50ms; }
-.stagger-2 { animation-delay: 100ms; }
-.stagger-3 { animation-delay: 150ms; }
-.stagger-4 { animation-delay: 200ms; }
-.stagger-5 { animation-delay: 250ms; }
-.stagger-6 { animation-delay: 300ms; }
+.stagger-1 {
+  animation-delay: 50ms;
+}
+.stagger-2 {
+  animation-delay: 100ms;
+}
+.stagger-3 {
+  animation-delay: 150ms;
+}
+.stagger-4 {
+  animation-delay: 200ms;
+}
+.stagger-5 {
+  animation-delay: 250ms;
+}
+.stagger-6 {
+  animation-delay: 300ms;
+}
 
 /* Soundwave bars with stagger */
 .soundwave-bar {
   animation: soundwave 0.6s ease-in-out infinite;
 }
-.soundwave-bar:nth-child(1) { animation-delay: 0ms; }
-.soundwave-bar:nth-child(2) { animation-delay: 100ms; }
-.soundwave-bar:nth-child(3) { animation-delay: 200ms; }
-.soundwave-bar:nth-child(4) { animation-delay: 300ms; }
-.soundwave-bar:nth-child(5) { animation-delay: 400ms; }
-.soundwave-bar:nth-child(6) { animation-delay: 500ms; }
-.soundwave-bar:nth-child(7) { animation-delay: 400ms; }
-.soundwave-bar:nth-child(8) { animation-delay: 300ms; }
-.soundwave-bar:nth-child(9) { animation-delay: 200ms; }
+.soundwave-bar:nth-child(1) {
+  animation-delay: 0ms;
+}
+.soundwave-bar:nth-child(2) {
+  animation-delay: 100ms;
+}
+.soundwave-bar:nth-child(3) {
+  animation-delay: 200ms;
+}
+.soundwave-bar:nth-child(4) {
+  animation-delay: 300ms;
+}
+.soundwave-bar:nth-child(5) {
+  animation-delay: 400ms;
+}
+.soundwave-bar:nth-child(6) {
+  animation-delay: 500ms;
+}
+.soundwave-bar:nth-child(7) {
+  animation-delay: 400ms;
+}
+.soundwave-bar:nth-child(8) {
+  animation-delay: 300ms;
+}
+.soundwave-bar:nth-child(9) {
+  animation-delay: 200ms;
+}
 
 /* ===== COMPONENT UTILITIES ===== */
 
@@ -345,39 +406,75 @@
 }
 
 /* Speaker badge colors */
-.speaker-badge-0 { @apply bg-[hsl(var(--speaker-1))] text-white; }
-.speaker-badge-1 { @apply bg-[hsl(var(--speaker-2))] text-white; }
-.speaker-badge-2 { @apply bg-[hsl(var(--speaker-3))] text-white; }
-.speaker-badge-3 { @apply bg-[hsl(var(--speaker-4))] text-white; }
-.speaker-badge-4 { @apply bg-[hsl(var(--speaker-5))] text-white; }
-.speaker-badge-5 { @apply bg-[hsl(var(--speaker-6))] text-white; }
+.speaker-badge-0 {
+  @apply bg-[hsl(var(--speaker-1))] text-white;
+}
+.speaker-badge-1 {
+  @apply bg-[hsl(var(--speaker-2))] text-white;
+}
+.speaker-badge-2 {
+  @apply bg-[hsl(var(--speaker-3))] text-white;
+}
+.speaker-badge-3 {
+  @apply bg-[hsl(var(--speaker-4))] text-white;
+}
+.speaker-badge-4 {
+  @apply bg-[hsl(var(--speaker-5))] text-white;
+}
+.speaker-badge-5 {
+  @apply bg-[hsl(var(--speaker-6))] text-white;
+}
 
 /* Speaker text colors */
-.speaker-text-0 { color: hsl(var(--speaker-1)); }
-.speaker-text-1 { color: hsl(var(--speaker-2)); }
-.speaker-text-2 { color: hsl(var(--speaker-3)); }
-.speaker-text-3 { color: hsl(var(--speaker-4)); }
-.speaker-text-4 { color: hsl(var(--speaker-5)); }
-.speaker-text-5 { color: hsl(var(--speaker-6)); }
+.speaker-text-0 {
+  color: hsl(var(--speaker-1));
+}
+.speaker-text-1 {
+  color: hsl(var(--speaker-2));
+}
+.speaker-text-2 {
+  color: hsl(var(--speaker-3));
+}
+.speaker-text-3 {
+  color: hsl(var(--speaker-4));
+}
+.speaker-text-4 {
+  color: hsl(var(--speaker-5));
+}
+.speaker-text-5 {
+  color: hsl(var(--speaker-6));
+}
 
 /* Speaker background colors (light) */
-.speaker-bg-0 { @apply bg-[hsl(var(--speaker-1)/0.1)]; }
-.speaker-bg-1 { @apply bg-[hsl(var(--speaker-2)/0.1)]; }
-.speaker-bg-2 { @apply bg-[hsl(var(--speaker-3)/0.1)]; }
-.speaker-bg-3 { @apply bg-[hsl(var(--speaker-4)/0.1)]; }
-.speaker-bg-4 { @apply bg-[hsl(var(--speaker-5)/0.1)]; }
-.speaker-bg-5 { @apply bg-[hsl(var(--speaker-6)/0.1)]; }
+.speaker-bg-0 {
+  @apply bg-[hsl(var(--speaker-1)/0.1)];
+}
+.speaker-bg-1 {
+  @apply bg-[hsl(var(--speaker-2)/0.1)];
+}
+.speaker-bg-2 {
+  @apply bg-[hsl(var(--speaker-3)/0.1)];
+}
+.speaker-bg-3 {
+  @apply bg-[hsl(var(--speaker-4)/0.1)];
+}
+.speaker-bg-4 {
+  @apply bg-[hsl(var(--speaker-5)/0.1)];
+}
+.speaker-bg-5 {
+  @apply bg-[hsl(var(--speaker-6)/0.1)];
+}
 
 /* ===== CUSTOM COMPONENTS ===== */
 
 /* Elegant input focus ring */
 .input-focus {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all;
+  @apply transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
 }
 
 /* Card hover state */
 .card-interactive {
-  @apply bg-card border rounded-2xl transition-all duration-300 cursor-pointer;
+  @apply cursor-pointer rounded-2xl border bg-card transition-all duration-300;
   @apply hover:border-primary/30;
 }
 .card-interactive:hover {
@@ -393,7 +490,7 @@
 
 /* Frosted glass panel */
 .frosted-panel {
-  @apply bg-background/80 backdrop-blur-xl border rounded-2xl;
+  @apply rounded-2xl border bg-background/80 backdrop-blur-xl;
   box-shadow:
     0 4px 12px -4px rgba(0, 0, 0, 0.06),
     0 8px 24px -8px rgba(0, 0, 0, 0.1);
@@ -406,7 +503,7 @@
 }
 
 .waveform-bar {
-  @apply w-1 bg-primary rounded-full transition-all duration-75;
+  @apply w-1 rounded-full bg-primary transition-all duration-75;
   min-height: 4px;
 }
 
@@ -419,12 +516,12 @@
 /* ===== TRANSCRIPT STYLES ===== */
 
 .transcript-segment {
-  @apply flex gap-3 p-3 rounded-xl transition-all duration-200;
+  @apply flex gap-3 rounded-xl p-3 transition-all duration-200;
   @apply hover:bg-muted/50;
 }
 
 .transcript-segment-active {
-  @apply bg-primary/5 border-l-2 border-primary;
+  @apply border-l-2 border-primary bg-primary/5;
 }
 
 /* ===== BUTTON VARIANTS ===== */
@@ -451,11 +548,11 @@
 /* ===== STATUS INDICATORS ===== */
 
 .status-dot {
-  @apply w-2 h-2 rounded-full;
+  @apply h-2 w-2 rounded-full;
 }
 
 .status-dot-recording {
-  @apply bg-destructive animate-gentle-pulse;
+  @apply animate-gentle-pulse bg-destructive;
 }
 
 .status-dot-processing {
@@ -470,11 +567,11 @@
 /* ===== EMPTY STATES ===== */
 
 .empty-state {
-  @apply flex flex-col items-center justify-center text-center py-16 px-8;
+  @apply flex flex-col items-center justify-center px-8 py-16 text-center;
 }
 
 .empty-state-icon {
-  @apply w-20 h-20 rounded-3xl bg-muted/50 flex items-center justify-center mb-6;
+  @apply mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted/50;
 }
 
 /* ===== RESPONSIVE HELPERS ===== */

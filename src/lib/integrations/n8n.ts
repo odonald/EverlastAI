@@ -28,10 +28,10 @@ export interface N8nWebhookConfig {
 }
 
 export type WebhookTrigger =
-  | 'transcription_complete'  // When a new transcription finishes
-  | 'session_saved'           // When a session is saved
-  | 'enrichment_added'        // When an AI enrichment is added
-  | 'manual';                 // Only triggered manually by user
+  | 'transcription_complete' // When a new transcription finishes
+  | 'session_saved' // When a session is saved
+  | 'enrichment_added' // When an AI enrichment is added
+  | 'manual'; // Only triggered manually by user
 
 export interface WebhookPayload {
   event: WebhookTrigger;
@@ -83,24 +83,24 @@ function buildPayloadFromTranscription(
     transcription: {
       transcript: transcription.transcript,
       summary: transcription.summary,
-      speakers: transcription.speakers.map(s => ({
+      speakers: transcription.speakers.map((s) => ({
         id: s.id,
         label: s.label,
         totalSpeakingTime: s.totalSpeakingTime,
       })),
-      utterances: transcription.utterances.map(u => ({
+      utterances: transcription.utterances.map((u) => ({
         speaker: u.speaker,
         text: u.text,
         start: u.start,
         end: u.end,
       })),
       detectedLanguage: transcription.detectedLanguage,
-      topics: transcription.topics?.map(t => t.topic),
-      entities: transcription.entities?.map(e => ({
+      topics: transcription.topics?.map((t) => t.topic),
+      entities: transcription.entities?.map((e) => ({
         type: e.type,
         value: e.value,
       })),
-      sentiments: transcription.sentiments?.map(s => ({
+      sentiments: transcription.sentiments?.map((s) => ({
         text: s.text,
         sentiment: s.sentiment,
       })),
@@ -111,10 +111,7 @@ function buildPayloadFromTranscription(
 /**
  * Build payload from full session
  */
-function buildPayloadFromSession(
-  session: FullSession,
-  trigger: WebhookTrigger
-): WebhookPayload {
+function buildPayloadFromSession(session: FullSession, trigger: WebhookTrigger): WebhookPayload {
   const base = buildPayloadFromTranscription(session.transcription, trigger);
 
   return {
@@ -133,10 +130,7 @@ function buildPayloadFromSession(
 /**
  * Check if a webhook should be triggered based on its filters
  */
-function shouldTrigger(
-  webhook: N8nWebhookConfig,
-  transcription: TranscriptionResult
-): boolean {
+function shouldTrigger(webhook: N8nWebhookConfig, transcription: TranscriptionResult): boolean {
   if (!webhook.enabled) return false;
 
   if (webhook.minDuration && transcription.metadata.duration < webhook.minDuration) {
@@ -219,7 +213,7 @@ export async function sendWebhook(
 
     // Wait before retry (exponential backoff)
     if (attempt < maxRetries - 1) {
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
     }
   }
 
@@ -236,13 +230,13 @@ export async function triggerTranscriptionWebhooks(
   const results = new Map<string, { success: boolean; error?: string }>();
 
   const eligibleWebhooks = webhooks.filter(
-    w => w.trigger === 'transcription_complete' && shouldTrigger(w, transcription)
+    (w) => w.trigger === 'transcription_complete' && shouldTrigger(w, transcription)
   );
 
   const payload = buildPayloadFromTranscription(transcription, 'transcription_complete');
 
   await Promise.all(
-    eligibleWebhooks.map(async webhook => {
+    eligibleWebhooks.map(async (webhook) => {
       const result = await sendWebhook(webhook, payload);
       results.set(webhook.id, result);
     })
@@ -261,13 +255,13 @@ export async function triggerSessionWebhooks(
   const results = new Map<string, { success: boolean; error?: string }>();
 
   const eligibleWebhooks = webhooks.filter(
-    w => w.trigger === 'session_saved' && shouldTrigger(w, session.transcription)
+    (w) => w.trigger === 'session_saved' && shouldTrigger(w, session.transcription)
   );
 
   const payload = buildPayloadFromSession(session, 'session_saved');
 
   await Promise.all(
-    eligibleWebhooks.map(async webhook => {
+    eligibleWebhooks.map(async (webhook) => {
       const result = await sendWebhook(webhook, payload);
       results.set(webhook.id, result);
     })
@@ -286,15 +280,13 @@ export async function triggerEnrichmentWebhooks(
 ): Promise<Map<string, { success: boolean; error?: string }>> {
   const results = new Map<string, { success: boolean; error?: string }>();
 
-  const eligibleWebhooks = webhooks.filter(
-    w => w.trigger === 'enrichment_added' && w.enabled
-  );
+  const eligibleWebhooks = webhooks.filter((w) => w.trigger === 'enrichment_added' && w.enabled);
 
   const payload = buildPayloadFromSession(session, 'enrichment_added');
   payload.enrichment = enrichment;
 
   await Promise.all(
-    eligibleWebhooks.map(async webhook => {
+    eligibleWebhooks.map(async (webhook) => {
       const result = await sendWebhook(webhook, payload);
       results.set(webhook.id, result);
     })
@@ -401,7 +393,7 @@ export async function saveWebhooksToStore(webhooks: N8nWebhookConfig[]): Promise
   const store = await load('settings.json');
 
   // Don't store auth tokens in plain text - encrypt them
-  const sanitized = webhooks.map(w => ({
+  const sanitized = webhooks.map((w) => ({
     ...w,
     // Keep auth token encrypted or use secure storage
     authToken: w.authToken ? '[ENCRYPTED]' : undefined,

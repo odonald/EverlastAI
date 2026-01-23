@@ -21,11 +21,7 @@ export function LoginButton({ size = 'default', className }: LoginButtonProps) {
     <Button
       onClick={handleClick}
       size={size}
-      className={cn(
-        'gap-2 rounded-xl',
-        size === 'lg' && 'h-12 px-8 text-base',
-        className
-      )}
+      className={cn('gap-2 rounded-xl', size === 'lg' && 'h-12 px-8 text-base', className)}
     >
       <LogIn className={cn('h-4 w-4', size === 'lg' && 'h-5 w-5')} />
       Sign In

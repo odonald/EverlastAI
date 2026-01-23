@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  ReactNode,
+} from 'react';
 import { Auth0Client } from '@auth0/auth0-spa-js';
 
 interface User {
@@ -47,7 +55,7 @@ function clearAuth0Cache() {
       keysToRemove.push(key);
     }
   }
-  keysToRemove.forEach(key => localStorage.removeItem(key));
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
   console.log('[Auth] Cleared Auth0 cache, removed keys:', keysToRemove.length);
 }
 

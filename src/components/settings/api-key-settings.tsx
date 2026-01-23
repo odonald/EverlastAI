@@ -1,7 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Eye, EyeOff, Check, Shield, Loader2, ShieldCheck, ShieldX, Mic2, Brain } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Check,
+  Shield,
+  Loader2,
+  ShieldCheck,
+  ShieldX,
+  Mic2,
+  Brain,
+} from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { cn } from '@/lib/utils';
 
@@ -36,7 +46,14 @@ interface ApiKeyInputProps {
   provider: ProviderType;
 }
 
-function ApiKeyInput({ label, description, value, onChange, placeholder, provider }: ApiKeyInputProps) {
+function ApiKeyInput({
+  label,
+  description,
+  value,
+  onChange,
+  placeholder,
+  provider,
+}: ApiKeyInputProps) {
   const [showKey, setShowKey] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
@@ -85,7 +102,7 @@ function ApiKeyInput({ label, description, value, onChange, placeholder, provide
   }, [value, provider]);
 
   return (
-    <div className="group rounded-2xl border bg-card p-4 transition-all duration-200 hover:border-primary/20 hover:shadow-soft">
+    <div className="hover:shadow-soft group rounded-2xl border bg-card p-4 transition-all duration-200 hover:border-primary/20">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -129,7 +146,7 @@ function ApiKeyInput({ label, description, value, onChange, placeholder, provide
           className={cn(
             'w-full rounded-xl border bg-background px-4 py-3 pr-12 text-sm transition-all duration-200',
             'placeholder:text-muted-foreground/50',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary',
+            'focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50',
             validationResult?.valid === true && 'border-green-500/50 bg-green-500/5',
             validationResult?.valid === false && 'border-destructive/50 bg-destructive/5'
           )}
@@ -137,17 +154,17 @@ function ApiKeyInput({ label, description, value, onChange, placeholder, provide
         <button
           type="button"
           onClick={() => setShowKey(!showKey)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
         </button>
       </div>
 
       {validationResult?.error && (
-        <p className="mt-2 text-sm text-destructive animate-fade-in">{validationResult.error}</p>
+        <p className="animate-fade-in mt-2 text-sm text-destructive">{validationResult.error}</p>
       )}
       {validationResult?.valid && validationResult.info && (
-        <p className="mt-2 text-sm text-green-600 dark:text-green-400 animate-fade-in">
+        <p className="animate-fade-in mt-2 text-sm text-green-600 dark:text-green-400">
           {formatValidationInfo(provider, validationResult.info)}
         </p>
       )}
@@ -193,7 +210,8 @@ export function ApiKeySettings() {
           <div>
             <p className="font-medium text-amber-700 dark:text-amber-300">Security Notice</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              API keys are encrypted and stored locally on your device. They are never sent to our servers.
+              API keys are encrypted and stored locally on your device. They are never sent to our
+              servers.
             </p>
           </div>
         </div>
@@ -203,14 +221,18 @@ export function ApiKeySettings() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Mic2 className="h-4 w-4 text-muted-foreground" />
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Transcription Services</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Transcription Services
+          </h4>
         </div>
 
         <ApiKeyInput
           label="Deepgram"
           description="Real-time speech-to-text with speaker detection"
           value={settings.apiKeys.deepgram}
-          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, deepgram: value } })}
+          onChange={(value) =>
+            updateSettings({ apiKeys: { ...settings.apiKeys, deepgram: value } })
+          }
           placeholder="Enter your Deepgram API key"
           provider="deepgram"
         />
@@ -219,7 +241,9 @@ export function ApiKeySettings() {
           label="ElevenLabs"
           description="Alternative transcription provider with NLP"
           value={settings.apiKeys.elevenlabs}
-          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, elevenlabs: value } })}
+          onChange={(value) =>
+            updateSettings({ apiKeys: { ...settings.apiKeys, elevenlabs: value } })
+          }
           placeholder="Enter your ElevenLabs API key"
           provider="elevenlabs"
         />
@@ -229,7 +253,9 @@ export function ApiKeySettings() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Brain className="h-4 w-4 text-muted-foreground" />
-          <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">AI / LLM Services</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            AI / LLM Services
+          </h4>
         </div>
 
         <ApiKeyInput
@@ -245,14 +271,16 @@ export function ApiKeySettings() {
           label="Anthropic"
           description="Claude for thoughtful text analysis"
           value={settings.apiKeys.anthropic}
-          onChange={(value) => updateSettings({ apiKeys: { ...settings.apiKeys, anthropic: value } })}
+          onChange={(value) =>
+            updateSettings({ apiKeys: { ...settings.apiKeys, anthropic: value } })
+          }
           placeholder="sk-ant-..."
           provider="anthropic"
         />
       </div>
 
       {isSaving && (
-        <div className="flex items-center justify-center gap-2 rounded-xl bg-muted/50 py-3 text-sm text-muted-foreground animate-fade-in">
+        <div className="animate-fade-in flex items-center justify-center gap-2 rounded-xl bg-muted/50 py-3 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           Saving changes...
         </div>

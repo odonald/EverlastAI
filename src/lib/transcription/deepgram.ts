@@ -72,7 +72,7 @@ function buildQueryParams(options: TranscriptionOptions): URLSearchParams {
 
   // Keywords for custom vocabulary
   if (options.keywords?.length) {
-    options.keywords.forEach(kw => params.append('keywords', kw));
+    options.keywords.forEach((kw) => params.append('keywords', kw));
   }
 
   return params;
@@ -123,13 +123,16 @@ function parseDeepgramResponse(
   );
 
   // Calculate speaker info
-  const speakerMap = new Map<number, {
-    totalTime: number;
-    count: number;
-    confidenceSum: number;
-  }>();
+  const speakerMap = new Map<
+    number,
+    {
+      totalTime: number;
+      count: number;
+      confidenceSum: number;
+    }
+  >();
 
-  utterances.forEach(u => {
+  utterances.forEach((u) => {
     const existing = speakerMap.get(u.speaker) || {
       totalTime: 0,
       count: 0,
@@ -141,14 +144,12 @@ function parseDeepgramResponse(
     speakerMap.set(u.speaker, existing);
   });
 
-  const speakers: SpeakerInfo[] = Array.from(speakerMap.entries()).map(
-    ([id, data]) => ({
-      id,
-      totalSpeakingTime: Math.round(data.totalTime * 100) / 100,
-      utteranceCount: data.count,
-      averageConfidence: Math.round((data.confidenceSum / data.count) * 100) / 100,
-    })
-  );
+  const speakers: SpeakerInfo[] = Array.from(speakerMap.entries()).map(([id, data]) => ({
+    id,
+    totalSpeakingTime: Math.round(data.totalTime * 100) / 100,
+    utteranceCount: data.count,
+    averageConfidence: Math.round((data.confidenceSum / data.count) * 100) / 100,
+  }));
 
   // Parse topics
   const topics: Topic[] = (response.results?.topics?.segments || []).map(
@@ -173,10 +174,8 @@ function parseDeepgramResponse(
 
   // Add sentiment to utterances
   if (sentiments.length > 0) {
-    utterances.forEach(u => {
-      const matchingSentiment = sentiments.find(
-        s => s.start >= u.start && s.end <= u.end
-      );
+    utterances.forEach((u) => {
+      const matchingSentiment = sentiments.find((s) => s.start >= u.start && s.end <= u.end);
       if (matchingSentiment) {
         u.sentiment = matchingSentiment.sentiment;
         u.sentimentScore = matchingSentiment.confidence;
@@ -198,18 +197,17 @@ function parseDeepgramResponse(
   );
 
   // Parse entities
-  const entities: Entity[] = (response.results?.entities || []).flatMap(
-    (e: DeepgramEntity) => ({
-      type: mapEntityType(e.label),
-      value: e.value,
-      confidence: e.confidence,
-      start: e.start,
-      end: e.end,
-    })
-  );
+  const entities: Entity[] = (response.results?.entities || []).flatMap((e: DeepgramEntity) => ({
+    type: mapEntityType(e.label),
+    value: e.value,
+    confidence: e.confidence,
+    start: e.start,
+    end: e.end,
+  }));
 
   // Get duration from metadata or calculate from utterances
-  const duration = response.metadata?.duration ||
+  const duration =
+    response.metadata?.duration ||
     (utterances.length > 0 ? utterances[utterances.length - 1].end : 0);
 
   // Detected languages
@@ -289,7 +287,7 @@ export async function transcribeWithDeepgram(
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      'Authorization': `Token ${apiKey}`,
+      Authorization: `Token ${apiKey}`,
       'Content-Type': audioBlob.type || 'audio/webm',
     },
     body: arrayBuffer,
@@ -333,7 +331,7 @@ export async function validateDeepgramKey(apiKey: string): Promise<{
   try {
     const response = await fetch('https://api.deepgram.com/v1/projects', {
       headers: {
-        'Authorization': `Token ${apiKey}`,
+        Authorization: `Token ${apiKey}`,
       },
     });
 
@@ -398,10 +396,10 @@ export function createDeepgramStream(options: DeepgramStreamingOptions) {
       params.set('language', options.language);
     }
 
-    socket = new WebSocket(
-      `wss://api.deepgram.com/v1/listen?${params.toString()}`,
-      ['token', apiKey]
-    );
+    socket = new WebSocket(`wss://api.deepgram.com/v1/listen?${params.toString()}`, [
+      'token',
+      apiKey,
+    ]);
 
     socket.onmessage = (event) => {
       try {

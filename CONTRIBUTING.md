@@ -76,6 +76,7 @@ pnpm tauri dev
 ### Development Workflow
 
 1. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -86,6 +87,7 @@ pnpm tauri dev
    - Follow existing patterns and conventions
 
 3. **Test your changes**
+
    ```bash
    pnpm lint           # Check for linting errors
    pnpm typecheck      # Check TypeScript types
@@ -94,6 +96,7 @@ pnpm tauri dev
    ```
 
 4. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "feat: add awesome feature"
@@ -109,6 +112,7 @@ pnpm tauri dev
    - `chore:` - Maintenance tasks
 
 5. **Push to your fork**
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -138,10 +142,7 @@ pnpm tauri dev
  * @param options - Transcription options including provider and API key
  * @returns The transcribed text
  */
-export async function transcribe(
-  audioBlob: Blob,
-  options: TranscriptionOptions
-): Promise<string> {
+export async function transcribe(audioBlob: Blob, options: TranscriptionOptions): Promise<string> {
   // Implementation
 }
 ```
@@ -240,6 +241,7 @@ pnpm test:coverage
 ```
 
 Write tests for:
+
 - Service adapters (transcription, LLM)
 - Utility functions
 - Complex business logic
@@ -256,6 +258,7 @@ pnpm test:e2e -- --ui
 ```
 
 Write E2E tests for:
+
 - Critical user flows (recording, playback, export)
 - Authentication flow
 - Settings management
@@ -292,6 +295,7 @@ Write E2E tests for:
 ## Documentation
 
 When adding features, update:
+
 - **README.md** - User-facing documentation
 - **CLAUDE.md** - AI development context (architecture, patterns)
 - **Inline comments** - Complex logic that isn't self-explanatory
@@ -313,6 +317,7 @@ When adding features, update:
 ## Recognition
 
 Contributors are recognized in:
+
 - GitHub's automatic contributors list
 - Release notes (for significant contributions)
 - README acknowledgments section

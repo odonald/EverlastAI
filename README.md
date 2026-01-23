@@ -10,7 +10,7 @@
 
 **Transform your voice into AI-enriched, structured content**
 
-*Contest Submission - Independent Project*
+_Contest Submission - Independent Project_
 
 ---
 
@@ -18,8 +18,8 @@
 
 Try the app with these demo credentials:
 
-| Email | Password |
-|-------|----------|
+| Email           | Password   |
+| --------------- | ---------- |
 | `demo@demo.com` | `Demo123!` |
 
 ---
@@ -30,7 +30,7 @@ Try the app with these demo credentials:
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org)
 [![Rust](https://img.shields.io/badge/Rust-1.70+-orange?logo=rust)](https://www.rust-lang.org)
 
-*Press a hotkey. Speak your thoughts. Get perfectly formatted, AI-enriched content.*
+_Press a hotkey. Speak your thoughts. Get perfectly formatted, AI-enriched content._
 
 [Download](#-download) · [Features](#-features) · [Documentation](#-documentation) · [Contributing](#-contributing)
 
@@ -43,6 +43,7 @@ Try the app with these demo credentials:
 Everlast AI Recorder is a **privacy-focused desktop application** that revolutionizes voice-to-text workflows. Capture ideas, meeting notes, and thoughts through natural speech, then watch as AI transforms them into structured, actionable content.
 
 Unlike simple voice recorders, Everlast AI Recorder provides:
+
 - **Real-time transcription** with speaker identification
 - **AI-powered enrichment** (summaries, tasks, insights, translation)
 - **Beautiful, formatted output** ready for immediate use
@@ -51,14 +52,14 @@ Unlike simple voice recorders, Everlast AI Recorder provides:
 
 ### Why Everlast AI Recorder?
 
-| Traditional Voice-to-Text | Everlast AI Recorder |
-|--------------------------|------------|
-| Raw, unformatted transcripts | Structured, formatted output |
-| No speaker identification | Full speaker diarization with custom names |
-| Single language only | Real-time language detection and switching |
-| Manual editing required | AI enrichment with multiple modes |
-| Limited export options | PDF, DOCX, Markdown, Notion, webhooks |
-| Cloud-only or local-only | Flexible: cloud APIs or fully local (Whisper + Ollama) |
+| Traditional Voice-to-Text    | Everlast AI Recorder                                   |
+| ---------------------------- | ------------------------------------------------------ |
+| Raw, unformatted transcripts | Structured, formatted output                           |
+| No speaker identification    | Full speaker diarization with custom names             |
+| Single language only         | Real-time language detection and switching             |
+| Manual editing required      | AI enrichment with multiple modes                      |
+| Limited export options       | PDF, DOCX, Markdown, Notion, webhooks                  |
+| Cloud-only or local-only     | Flexible: cloud APIs or fully local (Whisper + Ollama) |
 
 ---
 
@@ -76,6 +77,7 @@ Unlike simple voice recorders, Everlast AI Recorder provides:
 ### 🤖 AI-Powered Enrichments
 
 Apply these intelligent transformations to any recording:
+
 - **Summarize** - Generate concise summaries of conversations or notes
 - **Extract Tasks** - Automatically pull out action items and to-dos
 - **Key Insights** - Identify best practices, learnings, and important points
@@ -114,6 +116,7 @@ Apply these intelligent transformations to any recording:
 ### Prerequisites
 
 Before installing, ensure you have:
+
 - **Node.js** 18.0 or higher ([Download](https://nodejs.org/))
 - **pnpm** 9.0 or higher ([Install](https://pnpm.io/installation))
 - **Rust** 1.70 or higher ([Install](https://rustup.rs/))
@@ -177,6 +180,7 @@ NEXT_PUBLIC_NOTION_ENABLED=true
 #### macOS Permissions
 
 Everlast AI Recorder requires **Accessibility permissions** for global hotkeys:
+
 1. Go to System Preferences → Privacy & Security → Accessibility
 2. Add Everlast AI Recorder to the allowed apps list
 3. Restart the application
@@ -298,11 +302,9 @@ cd src-tauri && cargo check   # Fast type check
 ### Adding a New Transcription Provider
 
 1. Create `src/lib/transcription/newprovider.ts`:
+
 ```typescript
-export async function transcribeWithNewProvider(
-  audioBlob: Blob,
-  apiKey: string
-): Promise<string> {
+export async function transcribeWithNewProvider(audioBlob: Blob, apiKey: string): Promise<string> {
   // Implementation
 }
 ```
@@ -340,12 +342,12 @@ pnpm test:coverage
 
 ### Pre-built Binaries
 
-| Platform | Download | Requirements |
-|----------|----------|--------------|
-| macOS (Apple Silicon) | Coming soon | macOS 11.0+ |
-| macOS (Intel) | Coming soon | macOS 10.15+ |
-| Windows | Coming soon | Windows 10+ |
-| Linux | Coming soon | Ubuntu 20.04+ / Fedora 36+ |
+| Platform              | Download    | Requirements               |
+| --------------------- | ----------- | -------------------------- |
+| macOS (Apple Silicon) | Coming soon | macOS 11.0+                |
+| macOS (Intel)         | Coming soon | macOS 10.15+               |
+| Windows               | Coming soon | Windows 10+                |
+| Linux                 | Coming soon | Ubuntu 20.04+ / Fedora 36+ |
 
 ### Building from Source
 
@@ -389,6 +391,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 Built with these amazing technologies:
+
 - [Tauri](https://tauri.app) - Desktop framework
 - [Next.js](https://nextjs.org) - React framework
 - [Deepgram](https://deepgram.com) - Speech-to-text API

@@ -18,7 +18,7 @@ export function HotkeyIndicator() {
       <Keyboard className="h-3.5 w-3.5 text-muted-foreground lg:h-4 lg:w-4" />
       <kbd
         className={cn(
-          'rounded border bg-background px-1.5 py-0.5 text-[10px] font-mono font-medium lg:px-2 lg:text-xs',
+          'rounded border bg-background px-1.5 py-0.5 font-mono text-[10px] font-medium lg:px-2 lg:text-xs',
           'text-foreground shadow-sm'
         )}
       >
