@@ -602,14 +602,14 @@ export function LiveRecorder({
     beginRecording();
     console.log('[startImmediately] Recording started');
 
-    // If this was triggered from background, hide the window after a delay
-    // The delay ensures getUserMedia and WebSocket have fully initialized
+    // If this was triggered from background, hide the window quickly
+    // Recording has started, we can hide now
     if (hideAfterStart) {
-      // Wait a moment for everything to stabilize, then hide
+      // Minimal delay - just enough for recording to be active
       setTimeout(() => {
         console.log('[startImmediately] Hiding window for background recording');
         hideWindow();
-      }, 300);
+      }, 100);
     }
   }, [initializeSession, beginRecording]);
 

@@ -49,16 +49,19 @@ pub fn run() {
                             let was_focused = window.is_focused().unwrap_or(false);
                             println!("Window state - visible: {}, focused: {}", was_visible, was_focused);
 
-                            // Always show window first - required for JS to execute and getUserMedia to work
-                            if !was_visible {
-                                println!("Showing window for JS execution...");
+                            // Determine if this is a background trigger (window wasn't focused)
+                            let is_background = !was_focused;
+
+                            // CRITICAL: macOS throttles JS execution in unfocused webviews
+                            // We MUST focus the window for JS to execute immediately
+                            if !was_focused {
+                                println!("Focusing window for JS execution...");
                                 let _ = window.show();
+                                let _ = window.set_focus();
                             }
 
-                            // Determine if this is a background trigger (window wasn't visible or focused)
-                            let is_background = !was_visible || !was_focused;
-
-                            // Call the global hotkey handler function directly (more reliable than events)
+                            // Call the global hotkey handler function directly
+                            // JS will hide the window after recording starts if in background mode
                             let js_code = format!(
                                 "console.log('[Rust->JS] Calling __handleHotkey({})'); \
                                  if (typeof window.__handleHotkey === 'function') {{ \
