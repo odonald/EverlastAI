@@ -24,17 +24,7 @@ async function showAndFocusWindow() {
   if (typeof window === 'undefined' || !window.__TAURI__) return;
   try {
     const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const { LogicalPosition } = await import('@tauri-apps/api/dpi');
     const win = getCurrentWindow();
-
-    // Restore original position if it was moved off-screen
-    const originalPos = (window as unknown as { __originalPosition?: { x: number; y: number } }).__originalPosition;
-    if (originalPos) {
-      console.log('[showAndFocusWindow] Restoring position to:', originalPos);
-      await win.setPosition(new LogicalPosition(originalPos.x, originalPos.y));
-      delete (window as unknown as { __originalPosition?: unknown }).__originalPosition;
-    }
-
     await win.show();
     await win.setFocus();
   } catch (e) {
@@ -42,16 +32,28 @@ async function showAndFocusWindow() {
   }
 }
 
-// Hide the Tauri window (for background recording)
-async function hideWindow() {
+// Send app to background by hiding it (for background recording)
+// Uses macOS hide instead of close - app stays running but disappears
+async function sendToBackground() {
   if (typeof window === 'undefined' || !window.__TAURI__) return;
   try {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const win = getCurrentWindow();
-    await win.hide();
-    console.log('[Window] Hidden for background recording');
+    // Use AppleScript to hide our app - this returns focus to previous app
+    const { Command } = await import('@tauri-apps/plugin-shell');
+    const cmd = Command.create('osascript', [
+      '-e', 'tell application "System Events" to set visible of process "EverlastAI" to false'
+    ]);
+    await cmd.execute();
+    console.log('[Window] App hidden via AppleScript');
   } catch (e) {
-    console.error('Failed to hide window:', e);
+    console.error('Failed to hide app:', e);
+    // Fallback: just hide the window
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const win = getCurrentWindow();
+      await win.hide();
+    } catch (e2) {
+      console.error('Fallback hide also failed:', e2);
+    }
   }
 }
 
@@ -612,14 +614,14 @@ export function LiveRecorder({
     beginRecording();
     console.log('[startImmediately] Recording started');
 
-    // If this was triggered from background, hide the window quickly
-    // Recording has started, we can hide now
+    // If this was triggered from background, send app to background
+    // This hides the app and returns focus to previous app (e.g., Chrome)
     if (hideAfterStart) {
-      // Minimal delay - just enough for recording to be active
+      // Small delay to ensure recording has started
       setTimeout(() => {
-        console.log('[startImmediately] Hiding window for background recording');
-        hideWindow();
-      }, 100);
+        console.log('[startImmediately] Sending app to background');
+        sendToBackground();
+      }, 50);
     }
   }, [initializeSession, beginRecording]);
 

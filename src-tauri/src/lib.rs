@@ -45,42 +45,22 @@ pub fn run() {
                         println!("Global hotkey pressed!");
 
                         if let Some(window) = hotkey_handle.get_webview_window("main") {
-                            let was_visible = window.is_visible().unwrap_or(false);
                             let was_focused = window.is_focused().unwrap_or(false);
-                            println!("Window state - visible: {}, focused: {}", was_visible, was_focused);
+                            println!("Window state - focused: {}", was_focused);
 
                             // Determine if this is a background trigger (window wasn't focused)
                             let is_background = !was_focused;
 
                             // CRITICAL: macOS throttles JS execution in unfocused webviews
                             // We MUST focus the window for JS to execute immediately
-                            // To avoid visual flash, move window off-screen before showing
                             if !was_focused {
-                                println!("Background mode: moving window off-screen and focusing...");
-
-                                // Save current position for later restoration
-                                let original_pos = window.outer_position().ok();
-
-                                // Move window off-screen (invisible to user)
-                                use tauri::LogicalPosition;
-                                let _ = window.set_position(LogicalPosition::new(-10000.0, -10000.0));
-
-                                // Now show and focus - JS will execute but user sees nothing
+                                println!("Background mode: focusing window for JS execution...");
                                 let _ = window.show();
                                 let _ = window.set_focus();
-
-                                // Store original position for JS to restore later
-                                if let Some(pos) = original_pos {
-                                    let restore_js = format!(
-                                        "window.__originalPosition = {{ x: {}, y: {} }};",
-                                        pos.x, pos.y
-                                    );
-                                    let _ = window.eval(&restore_js);
-                                }
                             }
 
                             // Call the global hotkey handler function directly
-                            // JS will hide the window after recording starts if in background mode
+                            // JS will handle returning to previous app if in background mode
                             let js_code = format!(
                                 "console.log('[Rust->JS] Calling __handleHotkey({})'); \
                                  if (typeof window.__handleHotkey === 'function') {{ \
