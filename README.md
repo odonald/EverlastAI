@@ -49,6 +49,7 @@ Unlike simple voice recorders, Everlast AI Recorder provides:
 - **Beautiful, formatted output** ready for immediate use
 - **Privacy-first design** with local encrypted storage
 - **Seamless export** to PDF, DOCX, Markdown, Notion, and webhooks
+- **Automation-ready** with direct Zapier and n8n integration
 
 ### Why Everlast AI Recorder?
 
@@ -59,6 +60,7 @@ Unlike simple voice recorders, Everlast AI Recorder provides:
 | Single language only         | Real-time language detection and switching             |
 | Manual editing required      | AI enrichment with multiple modes                      |
 | Limited export options       | PDF, DOCX, Markdown, Notion, webhooks                  |
+| No automation support        | **Direct Zapier & n8n integration for workflows**      |
 | Cloud-only or local-only     | Flexible: cloud APIs or fully local (Whisper + Ollama) |
 
 ---
@@ -92,6 +94,24 @@ Apply these intelligent transformations to any recording:
 - **Email** - One-click sharing via mailto
 - **Webhooks** - Integrate with Zapier, n8n, Make, or custom endpoints
 - **Notion** - Direct export to your Notion workspace via OAuth
+
+### 🔗 Automation Ready
+
+**Turn voice into automated workflows!** The built-in webhook integration connects directly to popular automation platforms:
+
+| Platform                         | Use Case                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| **[Zapier](https://zapier.com)** | Connect to 5,000+ apps - auto-create tasks in Asana, send to Slack, update CRMs |
+| **[n8n](https://n8n.io)**        | Self-hosted automation - full control over your data and workflows              |
+| **[Make](https://make.com)**     | Visual workflow builder - complex multi-step automations                        |
+| **Custom Endpoints**             | Your own APIs - integrate with internal tools and databases                     |
+
+**Example automations:**
+
+- 🎯 Record a meeting → Auto-extract tasks → Create tickets in Jira
+- 📧 Voice memo → AI summary → Send digest email to team
+- 📝 Client call → Transcribe → Update CRM notes automatically
+- 🌐 Multilingual recording → Translate → Post to regional Slack channels
 
 ### 🔒 Privacy & Security
 
