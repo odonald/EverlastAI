@@ -15,6 +15,7 @@ import {
   Calendar,
   Sparkles,
   ChevronDown,
+  RefreshCw,
 } from 'lucide-react';
 import { cn, formatDurationHuman } from '@/lib/utils';
 import { SessionListItem } from '@/lib/sessions';
@@ -300,49 +301,63 @@ function DailySummary({ sessions, dateLabel }: DailySummaryProps) {
     return !!getApiKey();
   };
 
-  const handleExpand = async () => {
-    if (!expanded) {
-      // Expanding
-      if (!summary && hasLLMConfigured()) {
-        setLoading(true);
-        setError(null);
-        try {
-          // Build context from sessions
-          const context = sessions
-            .map((s, i) => {
-              return `Recording ${i + 1}: "${s.title}"
+  const generateSummary = async () => {
+    if (!hasLLMConfigured()) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      // Build context from sessions
+      const context = sessions
+        .map((s, i) => {
+          return `Recording ${i + 1}: "${s.title}"
 Duration: ${formatDurationHuman(s.duration)}
 Preview: ${s.preview}
 ---`;
-            })
-            .join('\n\n');
+        })
+        .join('\n\n');
 
-          const result = await enrich(context, {
-            provider: settings.llmProvider as LLMProvider,
-            mode: 'daily-summary',
-            apiKey: getApiKey(),
-            ollamaEndpoint: settings.ollamaEndpoint,
-            ollamaModel: settings.ollamaModel,
-          });
+      const result = await enrich(context, {
+        provider: settings.llmProvider as LLMProvider,
+        mode: 'daily-summary',
+        apiKey: getApiKey(),
+        ollamaEndpoint: settings.ollamaEndpoint,
+        ollamaModel: settings.ollamaModel,
+      });
 
-          setSummary(result);
-          // Cache the result
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify({
-              summary: result,
-              timestamp: Date.now(),
-            })
-          );
-        } catch (err) {
-          console.error('Failed to generate daily summary:', err);
-          setError(err instanceof Error ? err.message : 'Failed to generate summary');
-        } finally {
-          setLoading(false);
-        }
-      }
+      setSummary(result);
+      // Cache the result
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          summary: result,
+          timestamp: Date.now(),
+        })
+      );
+    } catch (err) {
+      console.error('Failed to generate daily summary:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate summary');
+    } finally {
+      setLoading(false);
     }
-    setExpanded(!expanded);
+  };
+
+  const handleExpand = () => {
+    const willExpand = !expanded;
+    setExpanded(willExpand);
+
+    // If expanding and no summary yet, start generating
+    if (willExpand && !summary && !loading && hasLLMConfigured()) {
+      generateSummary();
+    }
+  };
+
+  const handleRefresh = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Clear cache and regenerate
+    localStorage.removeItem(cacheKey);
+    setSummary(null);
+    await generateSummary();
   };
 
   return (
@@ -371,23 +386,23 @@ Preview: ${s.preview}
       {expanded && (
         <div className="animate-fade-in border-t border-violet-500/10 px-4 pb-4 pt-2">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
+            <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
-              <span className="ml-3 text-sm text-muted-foreground">Generating summary...</span>
+              <span className="mt-3 text-sm text-muted-foreground">
+                Generating your daily summary...
+              </span>
+              <span className="mt-1 text-xs text-muted-foreground/60">
+                This may take a few seconds
+              </span>
             </div>
           ) : error ? (
             <div className="py-4 text-center">
               <p className="text-sm text-destructive">{error}</p>
               <button
-                onClick={() => {
-                  setError(null);
-                  setSummary(null);
-                  // Close and reopen to trigger generation
-                  setExpanded(false);
-                  setTimeout(() => handleExpand(), 100);
-                }}
-                className="mt-2 text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+                onClick={handleRefresh}
+                className="mt-2 inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
               >
+                <RefreshCw className="h-3 w-3" />
                 Try again
               </button>
             </div>
@@ -398,50 +413,26 @@ Preview: ${s.preview}
               </p>
             </div>
           ) : summary ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
-                {summary}
+            <div className="relative">
+              {/* Refresh button */}
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="absolute right-0 top-0 rounded-lg p-1.5 text-muted-foreground/50 transition-colors hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400"
+                title="Regenerate summary"
+              >
+                <RefreshCw className={cn('h-4 w-4', loading && 'animate-spin')} />
+              </button>
+              <div className="prose prose-sm dark:prose-invert max-w-none pr-8">
+                <div className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
+                  {summary}
+                </div>
               </div>
             </div>
           ) : (
             <div className="py-6 text-center">
               <button
-                onClick={async () => {
-                  setLoading(true);
-                  setError(null);
-                  try {
-                    const context = sessions
-                      .map((s, i) => {
-                        return `Recording ${i + 1}: "${s.title}"
-Duration: ${formatDurationHuman(s.duration)}
-Preview: ${s.preview}
----`;
-                      })
-                      .join('\n\n');
-
-                    const result = await enrich(context, {
-                      provider: settings.llmProvider as LLMProvider,
-                      mode: 'daily-summary',
-                      apiKey: getApiKey(),
-                      ollamaEndpoint: settings.ollamaEndpoint,
-                      ollamaModel: settings.ollamaModel,
-                    });
-
-                    setSummary(result);
-                    localStorage.setItem(
-                      cacheKey,
-                      JSON.stringify({
-                        summary: result,
-                        timestamp: Date.now(),
-                      })
-                    );
-                  } catch (err) {
-                    console.error('Failed to generate daily summary:', err);
-                    setError(err instanceof Error ? err.message : 'Failed to generate summary');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
+                onClick={() => generateSummary()}
                 className="inline-flex items-center gap-2 rounded-lg bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-300"
               >
                 <Sparkles className="h-4 w-4" />
