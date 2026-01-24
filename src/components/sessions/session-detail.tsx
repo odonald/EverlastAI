@@ -1353,11 +1353,19 @@ export function SessionDetail({
                 : null;
 
             return (
-              <button
+              <div
                 key={tab.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => setActiveTab(tab.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveTab(tab.id);
+                  }
+                }}
                 className={cn(
-                  'group flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+                  'group flex shrink-0 cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
                   isActive
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -1378,7 +1386,7 @@ export function SessionDetail({
                     <X className="h-3 w-3" />
                   </button>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>
