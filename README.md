@@ -140,6 +140,10 @@ Before installing, ensure you have:
 - **Node.js** 18.0 or higher ([Download](https://nodejs.org/))
 - **pnpm** 9.0 or higher ([Install](https://pnpm.io/installation))
 - **Rust** 1.70 or higher ([Install](https://rustup.rs/))
+- **Auth0 Account** - Required for authentication ([Sign up free](https://auth0.com/))
+  - Create a Single Page Application in Auth0 Dashboard
+  - Set allowed callback URLs to `http://localhost:3000`
+  - Copy your Domain and Client ID to `.env`
 - **API Keys** for at least one transcription and one LLM provider:
   - Transcription: [Deepgram](https://deepgram.com) or [ElevenLabs](https://elevenlabs.io)
   - LLM: [OpenAI](https://platform.openai.com) or [Anthropic](https://console.anthropic.com)
